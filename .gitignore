@@ -6,6 +6,9 @@ dist/
 wheels/
 *.egg-info
 
+# Node modules
+node_modules/
+
 # Virtual environments
 .venv
 
@@ -39,3 +42,5 @@ Thumbs.db
 # Logs
 *.log
 logs/
+*storybook.log
+storybook-static
