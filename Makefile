@@ -1,4 +1,4 @@
-.PHONY: build-dev build-compose start-dev start-compose
+.PHONY: build-dev build-compose start-dev start-compose start-compose-dev
 
 # Build local development runtime (Python + UI)
 build-dev:
@@ -7,7 +7,9 @@ build-dev:
 
 # Build Docker images for running axion in containers
 build-compose:
-	docker compose build
+	docker build -f axion.dockerfile -t axion:latest .
+	docker build -f axion_alembic.dockerfile -t axion-alembic:latest .
+	docker build -f axion_ui.dockerfile -t axion-ui:latest .
 
 # Start local development servers
 start-dev:
@@ -16,3 +18,7 @@ start-dev:
 # Start axion with Docker Compose (includes all services)
 start-compose:
 	docker compose up -d
+
+# Start development environment with hot-reload (Docker)
+start-compose-dev:
+	docker compose -f compose.dev.yml up -d

@@ -1,0 +1,104 @@
+version: "3.8"
+
+services:
+  axion:
+    build:
+      context: .
+      dockerfile: axion.dockerfile
+    container_name: axion-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./src/axion:/app/src/axion
+      - ./pyproject.toml:/app/pyproject.toml:ro
+    environment:
+      - DATABASE_URL=postgresql://axion:axion_dev_password@postgres:5432/axion
+      - S3_ENDPOINT_URL=http://minio:9000
+      - S3_ACCESS_KEY_ID=minioadmin
+      - S3_SECRET_ACCESS_KEY=minioadmin
+    command: ["uv", "run", "uvicorn", "axion.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio-setup:
+        condition: service_completed_successfully
+
+  axion-alembic:
+    build:
+      context: .
+      dockerfile: axion_alembic.dockerfile
+    container_name: axion-alembic
+    volumes:
+      - ./src/axion:/app/src/axion
+      - ./src/axion_alembic:/app/src/axion_alembic
+      - ./alembic.ini:/app/alembic.ini:ro
+    environment:
+      - DATABASE_URL=postgresql://axion:axion_dev_password@postgres:5432/axion
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  axion-ui:
+    build:
+      context: .
+      dockerfile: axion_ui.dockerfile
+    container_name: axion-ui
+    ports:
+      - "6006:6006"
+    volumes:
+      - ./src/axion_ui:/app
+      - /app/node_modules
+    command: ["pnpm", "storybook", "--host", "0.0.0.0"]
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: axion-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-axion}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-axion_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-axion}
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U axion -d axion"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    container_name: axion-minio
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    ports:
+      - "${MINIO_API_PORT:-9010}:9000"
+      - "${MINIO_CONSOLE_PORT:-9011}:9001"
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  minio-setup:
+    image: minio/mc:latest
+    container_name: axion-minio-setup
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+        mc alias set local http://minio:9000 minioadmin minioadmin;
+        mc mb local/axion-artifacts --ignore-existing;
+        mc mb local/axion-archives --ignore-existing;
+        exit 0;
+      "
+
+volumes:
+  postgres_data:
+  minio_data:
