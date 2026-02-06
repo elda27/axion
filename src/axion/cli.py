@@ -63,7 +63,7 @@ def run_server(host: str, port: int, reload: bool) -> None:
     import uvicorn
 
     uvicorn.run(
-        "axion.api.app:app",
+        "axion_server.api.app:app",
         host=host,
         port=port,
         reload=reload,

@@ -18,10 +18,10 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-from axion.models import entities  # noqa: F401 - ensure all models are imported
+from axion_server.models import entities  # noqa: F401 - ensure all models are imported
 
 # Import models for autogenerate support
-from axion.models.base import Base
+from axion_server.models.base import Base
 
 target_metadata = Base.metadata
 

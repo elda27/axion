@@ -13,6 +13,7 @@ RUN uv sync --frozen --no-dev
 
 # Copy source code
 COPY src/axion ./src/axion
+COPY src/axion_server ./src/axion_server
 COPY src/axion_alembic ./src/axion_alembic
 
 # Run migrations

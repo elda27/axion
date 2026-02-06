@@ -1,22 +1,23 @@
 version: "3.8"
 
 services:
-  axion:
+  axion-server:
     build:
       context: .
-      dockerfile: axion.dockerfile
-    container_name: axion-api
+      dockerfile: axion_server.dockerfile
+    container_name: axion-server
     ports:
       - "8000:8000"
     volumes:
       - ./src/axion:/app/src/axion
+      - ./src/axion_server:/app/src/axion_server
       - ./pyproject.toml:/app/pyproject.toml:ro
     environment:
       - DATABASE_URL=postgresql://axion:axion_dev_password@postgres:5432/axion
       - S3_ENDPOINT_URL=http://minio:9000
       - S3_ACCESS_KEY_ID=minioadmin
       - S3_SECRET_ACCESS_KEY=minioadmin
-    command: ["uv", "run", "uvicorn", "axion.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    command: ["uv", "run", "uvicorn", "axion_server.api.app:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     depends_on:
       postgres:
         condition: service_healthy
@@ -30,6 +31,7 @@ services:
     container_name: axion-alembic
     volumes:
       - ./src/axion:/app/src/axion
+      - ./src/axion_server:/app/src/axion_server
       - ./src/axion_alembic:/app/src/axion_alembic
       - ./alembic.ini:/app/alembic.ini:ro
     environment:

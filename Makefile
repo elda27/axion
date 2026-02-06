@@ -8,6 +8,7 @@ build-dev:
 # Build Docker images for running axion in containers
 build-compose:
 	docker build -f axion.dockerfile -t axion:latest .
+	docker build -f axion_server.dockerfile -t axion-server:latest .
 	docker build -f axion_alembic.dockerfile -t axion-alembic:latest .
 	docker build -f axion_ui.dockerfile -t axion-ui:latest .
 
