@@ -1,0 +1,11 @@
+---
+# Axion handlers
+
+- name: Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: yes
+
+- name: Restart axion-backend
+  ansible.builtin.systemd:
+    name: axion-backend
+    state: restarted

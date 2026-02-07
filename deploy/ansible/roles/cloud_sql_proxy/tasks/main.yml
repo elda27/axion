@@ -1,0 +1,35 @@
+---
+# Cloud SQL Proxy role - Install and configure Cloud SQL Auth Proxy
+
+- name: Check if Cloud SQL Proxy is installed
+  ansible.builtin.stat:
+    path: /usr/local/bin/cloud-sql-proxy
+  register: cloud_sql_proxy_installed
+
+- name: Download Cloud SQL Auth Proxy
+  ansible.builtin.get_url:
+    url: "https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v{{ cloud_sql_proxy_version }}/cloud-sql-proxy.linux.amd64"
+    dest: /usr/local/bin/cloud-sql-proxy
+    mode: "0755"
+    owner: root
+    group: root
+  when: not cloud_sql_proxy_installed.stat.exists or force_reinstall | default(false)
+
+- name: Create Cloud SQL Proxy systemd service
+  ansible.builtin.template:
+    src: cloud-sql-proxy.service.j2
+    dest: /etc/systemd/system/cloud-sql-proxy.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Reload systemd
+    - Restart cloud-sql-proxy
+
+- name: Enable and start Cloud SQL Proxy service
+  ansible.builtin.systemd:
+    name: cloud-sql-proxy
+    state: started
+    enabled: yes
+    daemon_reload: yes
+  when: cloud_sql_instance is defined and cloud_sql_instance != ""

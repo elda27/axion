@@ -1,0 +1,73 @@
+---
+# Rollback playbook for Axion application
+
+- name: Rollback Axion Deployment
+  hosts: "{{ target_hosts | default('gcp') }}"
+  become: yes
+
+  vars:
+    backup_dir: /opt/axion-backup
+
+  tasks:
+    - name: Check if backup exists
+      ansible.builtin.stat:
+        path: "{{ backup_dir }}"
+      register: backup_check
+
+    - name: Fail if no backup available
+      ansible.builtin.fail:
+        msg: "No backup found at {{ backup_dir }}. Cannot rollback."
+      when: not backup_check.stat.exists
+
+    - name: Stop axion-backend service
+      ansible.builtin.systemd:
+        name: axion-backend
+        state: stopped
+
+    - name: Remove current deployment
+      ansible.builtin.file:
+        path: "{{ app_dir }}"
+        state: absent
+
+    - name: Restore from backup
+      ansible.builtin.copy:
+        src: "{{ backup_dir }}/"
+        dest: "{{ app_dir }}/"
+        remote_src: yes
+        owner: "{{ app_user }}"
+        group: "{{ app_group }}"
+        mode: preserve
+
+    - name: Start axion-backend service
+      ansible.builtin.systemd:
+        name: axion-backend
+        state: started
+
+    - name: Reload nginx
+      ansible.builtin.systemd:
+        name: nginx
+        state: reloaded
+
+    - name: Health Check after rollback
+      ansible.builtin.uri:
+        url: "http://localhost/health"
+        method: GET
+        status_code: 200
+      register: health_check
+      retries: 5
+      delay: 3
+      until: health_check.status == 200
+
+    - name: Display rollback result
+      ansible.builtin.debug:
+        msg: |
+          ================================================
+          Rollback Complete!
+          ================================================
+          
+          The application has been rolled back to the previous version.
+          
+          Verify services:
+          - sudo systemctl status axion-backend
+          - sudo systemctl status nginx
+          ================================================

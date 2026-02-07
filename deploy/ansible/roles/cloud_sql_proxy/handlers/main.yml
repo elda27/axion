@@ -1,0 +1,11 @@
+---
+# Cloud SQL Proxy handlers
+
+- name: Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: yes
+
+- name: Restart cloud-sql-proxy
+  ansible.builtin.systemd:
+    name: cloud-sql-proxy
+    state: restarted

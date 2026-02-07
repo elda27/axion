@@ -1,0 +1,30 @@
+[Unit]
+Description=Axion Backend API Server
+Documentation=https://github.com/your-org/axion
+After=network.target cloud-sql-proxy.service
+Requires=cloud-sql-proxy.service
+
+[Service]
+Type=simple
+User={{ app_user }}
+Group={{ app_group }}
+WorkingDirectory={{ app_dir }}
+EnvironmentFile={{ app_dir }}/.env
+ExecStart={{ app_dir }}/.venv/bin/uvicorn axion_server.api.app:app --host {{ backend_host }} --port {{ backend_port }}
+Restart=always
+RestartSec=10
+StandardOutput=append:{{ log_dir }}/axion-backend.log
+StandardError=append:{{ log_dir }}/axion-backend.error.log
+
+# Security hardening
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ReadWritePaths={{ app_dir }} {{ log_dir }}
+
+# Resource limits
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

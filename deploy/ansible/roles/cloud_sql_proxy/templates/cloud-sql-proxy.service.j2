@@ -1,0 +1,23 @@
+[Unit]
+Description=Cloud SQL Auth Proxy
+Documentation=https://cloud.google.com/sql/docs/mysql/sql-proxy
+After=network.target
+
+[Service]
+Type=simple
+User={{ app_user }}
+Group={{ app_group }}
+ExecStart=/usr/local/bin/cloud-sql-proxy --port {{ cloud_sql_proxy_port }} {{ cloud_sql_instance }}
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+# Security hardening
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target

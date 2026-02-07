@@ -1,0 +1,25 @@
+---
+# Staging environment variables
+
+environment: staging
+
+# Cloud SQL
+cloud_sql_instance: "{{ lookup('env', 'CLOUD_SQL_INSTANCE_STAGING') | default(lookup('env', 'CLOUD_SQL_INSTANCE'), true) }}"
+
+# Database
+db_user: "{{ lookup('env', 'DB_USER_STAGING') | default('axion', true) }}"
+db_password: "{{ lookup('env', 'DB_PASSWORD_STAGING') | default(lookup('env', 'DB_PASSWORD'), true) }}"
+db_name: "{{ lookup('env', 'DB_NAME_STAGING') | default('axion_staging', true) }}"
+database_url: "postgresql+asyncpg://{{ db_user }}:{{ db_password }}@localhost:{{ cloud_sql_proxy_port }}/{{ db_name }}"
+
+# GCS
+gcs_project_id: "{{ lookup('env', 'GCP_PROJECT_ID') }}"
+gcs_bucket: "{{ lookup('env', 'GCS_BUCKET_STAGING') | default('axion-artifacts-staging', true) }}"
+
+# Application settings
+app_debug: true
+object_store_provider: gcs
+
+# SSL
+ssl_enabled: false
+ssl_domain: ""

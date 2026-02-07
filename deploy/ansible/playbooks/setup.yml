@@ -1,0 +1,67 @@
+---
+# Main playbook for complete VM setup
+
+- name: Setup Axion VM
+  hosts: "{{ target_hosts | default('gcp') }}"
+  become: yes
+  
+  vars:
+    upgrade_packages: true
+
+  pre_tasks:
+    - name: Validate required variables
+      ansible.builtin.assert:
+        that:
+          - cloud_sql_instance is defined
+          - cloud_sql_instance != ""
+          - db_password is defined
+          - db_password != ""
+          - gcs_project_id is defined
+          - gcs_project_id != ""
+        fail_msg: "Required environment variables are not set. Please set CLOUD_SQL_INSTANCE, DB_PASSWORD, and GCP_PROJECT_ID."
+      tags: [always]
+
+    - name: Display deployment information
+      ansible.builtin.debug:
+        msg: |
+          Deploying Axion to {{ inventory_hostname }}
+          Environment: {{ environment | default('unknown') }}
+          Cloud SQL Instance: {{ cloud_sql_instance }}
+          GCS Bucket: {{ gcs_bucket }}
+      tags: [always]
+
+  roles:
+    - role: common
+      tags: [common, base]
+    
+    - role: python
+      tags: [python]
+    
+    - role: nginx
+      tags: [nginx, web]
+    
+    - role: cloud_sql_proxy
+      tags: [database, cloudsql]
+    
+    - role: axion
+      tags: [axion, app]
+
+  post_tasks:
+    - name: Display setup completion message
+      ansible.builtin.debug:
+        msg: |
+          ================================================
+          Axion VM Setup Complete!
+          ================================================
+          
+          Next steps:
+          1. Deploy application code using deploy.yml playbook
+          2. Run database migrations
+          3. Verify services are running:
+             - sudo systemctl status cloud-sql-proxy
+             - sudo systemctl status axion-backend
+             - sudo systemctl status nginx
+          
+          Health check URL: http://{{ ansible_host }}/health
+          ================================================
+      tags: [always]
