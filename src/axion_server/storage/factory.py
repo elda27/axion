@@ -4,6 +4,7 @@ from functools import lru_cache
 
 from axion.config import get_settings
 from axion_server.storage.base import ObjectStore
+from axion_server.storage.gcs import GCSObjectStore
 from axion_server.storage.local import LocalObjectStore
 from axion_server.storage.s3 import S3ObjectStore
 
@@ -17,6 +18,12 @@ def get_object_store() -> ObjectStore:
         return LocalObjectStore(
             base_path=settings.object_store_local_path,
             bucket=settings.object_store_bucket,
+        )
+    elif settings.object_store_provider == "gcs":
+        return GCSObjectStore(
+            bucket=settings.object_store_bucket,
+            project_id=settings.gcs_project_id,
+            credentials_path=settings.gcs_credentials_path,
         )
     else:
         # S3 or MinIO

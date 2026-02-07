@@ -2,9 +2,12 @@
   "name": "axion_ui",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
@@ -18,10 +21,14 @@
     "@mui/icons-material": "^7.3.7",
     "@mui/material": "^7.3.7",
     "react": "^19.2.4",
+    "react-dom": "^19.2.4",
     "typescript": "^5.9.3",
     "vite": "^7.3.1"
   },
   "devDependencies": {
+    "@types/react": "^19.2.4",
+    "@types/react-dom": "^19.2.4",
+    "@vitejs/plugin-react": "^4.5.2",
     "storybook": "^10.2.6",
     "@storybook/react-vite": "^10.2.6",
     "@chromatic-com/storybook": "^5.0.0",

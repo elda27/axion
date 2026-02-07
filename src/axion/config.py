@@ -29,13 +29,17 @@ class Settings(BaseSettings):
     database_type: Literal["postgresql", "sqlite"] = "postgresql"
 
     # Object Storage
-    object_store_provider: Literal["s3", "minio", "local"] = "minio"
+    object_store_provider: Literal["s3", "minio", "gcs", "local"] = "minio"
     object_store_endpoint: str = "http://localhost:9010"
     object_store_access_key: str = "minioadmin"
     object_store_secret_key: str = "minioadmin"
     object_store_bucket: str = "axion-artifacts"
     object_store_region: str = "us-east-1"
     object_store_local_path: str = "./data/object_store"
+
+    # GCS specific settings
+    gcs_project_id: str | None = None
+    gcs_credentials_path: str | None = None
 
     # API
     api_prefix: str = "/v1"
