@@ -23,3 +23,19 @@ start-compose:
 # Start development environment with hot-reload (Docker)
 start-compose-dev:
 	docker compose -f compose.dev.yml up -d
+
+# Start Storybook in development mode (Docker)
+storybook-dev:
+	docker compose -f compose.dev.yml up -d axion-ui
+
+# Start Storybook locally (without Docker)
+storybook-local:
+	cd src/axion_ui && pnpm storybook
+
+# Build Storybook static files
+storybook-build:
+	cd src/axion_ui && pnpm build-storybook
+
+# Stop Storybook container
+storybook-stop:
+	docker compose -f compose.dev.yml stop axion-ui

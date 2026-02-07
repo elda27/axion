@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - develop
   workflow_dispatch:
     inputs:
       environment:
@@ -14,6 +15,11 @@ on:
         options:
           - production
           - staging
+      deploy_storybook:
+        description: 'Deploy Storybook (staging only)'
+        required: false
+        default: true
+        type: boolean
 
 env:
   GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
@@ -108,10 +114,22 @@ jobs:
           pnpm install --frozen-lockfile
           pnpm build
 
+      - name: Build Storybook
+        if: inputs.environment == 'staging' || github.ref == 'refs/heads/develop'
+        working-directory: src/axion_ui
+        run: |
+          pnpm build-storybook
+
       - name: Package Frontend
         run: |
           mkdir -p dist
           cd src/axion_ui/dist && tar -czf ../../../dist/axion-frontend.tar.gz .
+
+      - name: Package Storybook
+        if: inputs.environment == 'staging' || github.ref == 'refs/heads/develop'
+        run: |
+          mkdir -p dist
+          cd src/axion_ui/storybook-static && tar -czf ../../../dist/axion-storybook.tar.gz .
 
       - name: Upload Backend Artifact
         id: upload-backend
@@ -127,6 +145,15 @@ jobs:
         with:
           name: axion-frontend
           path: dist/axion-frontend.tar.gz
+          retention-days: 7
+
+      - name: Upload Storybook Artifact
+        if: inputs.environment == 'staging' || github.ref == 'refs/heads/develop'
+        id: upload-storybook
+        uses: actions/upload-artifact@v4
+        with:
+          name: axion-storybook
+          path: dist/axion-storybook.tar.gz
           retention-days: 7
 
   # Deploy to GCP
@@ -167,10 +194,20 @@ jobs:
           name: axion-frontend
           path: dist/
 
+      - name: Download Storybook Artifact
+        if: inputs.environment == 'staging' || github.ref == 'refs/heads/develop'
+        uses: actions/download-artifact@v4
+        with:
+          name: axion-storybook
+          path: dist/
+
       - name: Upload artifacts to GCS (staging)
         run: |
           gsutil cp dist/axion-backend.tar.gz gs://${{ env.GCS_BUCKET }}-deploy/releases/${{ github.sha }}/
           gsutil cp dist/axion-frontend.tar.gz gs://${{ env.GCS_BUCKET }}-deploy/releases/${{ github.sha }}/
+          if [ -f dist/axion-storybook.tar.gz ]; then
+            gsutil cp dist/axion-storybook.tar.gz gs://${{ env.GCS_BUCKET }}-deploy/releases/${{ github.sha }}/
+          fi
 
       - name: Create environment file
         run: |
@@ -200,14 +237,19 @@ jobs:
           
           RELEASE_DIR="/opt/axion"
           UI_DIR="/var/www/axion-ui"
+          STORYBOOK_DIR="/var/www/axion-storybook"
           RELEASE_SHA="${RELEASE_SHA}"
           GCS_BUCKET="${GCS_BUCKET}"
+          DEPLOY_STORYBOOK="${DEPLOY_STORYBOOK}"
           
           echo "=== Downloading release artifacts ==="
           cd /tmp
           gsutil cp gs://${GCS_BUCKET}-deploy/releases/${RELEASE_SHA}/axion-backend.tar.gz .
           gsutil cp gs://${GCS_BUCKET}-deploy/releases/${RELEASE_SHA}/axion-frontend.tar.gz .
           gsutil cp gs://${GCS_BUCKET}-deploy/releases/${RELEASE_SHA}/.env .
+          if [ "${DEPLOY_STORYBOOK}" = "true" ]; then
+            gsutil cp gs://${GCS_BUCKET}-deploy/releases/${RELEASE_SHA}/axion-storybook.tar.gz . || echo "No storybook artifact found"
+          fi
           
           echo "=== Extracting backend ==="
           sudo rm -rf ${RELEASE_DIR}/*
@@ -220,6 +262,13 @@ jobs:
           sudo tar -xzf axion-frontend.tar.gz -C ${UI_DIR}
           sudo chown -R axion:axion ${UI_DIR}
           
+          if [ "${DEPLOY_STORYBOOK}" = "true" ] && [ -f axion-storybook.tar.gz ]; then
+            echo "=== Extracting Storybook ==="
+            sudo rm -rf ${STORYBOOK_DIR}/*
+            sudo tar -xzf axion-storybook.tar.gz -C ${STORYBOOK_DIR}
+            sudo chown -R axion:axion ${STORYBOOK_DIR}
+          fi
+          
           echo "=== Setting up Python environment ==="
           cd ${RELEASE_DIR}
           sudo -u axion ~/.local/bin/uv venv .venv --python=3.12
@@ -229,11 +278,15 @@ jobs:
           sudo -u axion bash -c "source .venv/bin/activate && alembic upgrade head"
           
           echo "=== Configuring nginx ==="
-          sudo cp ${RELEASE_DIR}/deploy/gcp/nginx.conf /etc/nginx/sites-available/axion
+          if [ "${DEPLOY_STORYBOOK}" = "true" ]; then
+            sudo cp ${RELEASE_DIR}/deploy/gcp/nginx-dev.conf /etc/nginx/sites-available/axion
+          else
+            sudo cp ${RELEASE_DIR}/deploy/gcp/nginx.conf /etc/nginx/sites-available/axion
+          fi
           sudo ln -sf /etc/nginx/sites-available/axion /etc/nginx/sites-enabled/axion
           sudo nginx -t
           
-          echo "=== Restarting services ==="
+          echo "=== Restarting services ===" 
           sudo systemctl restart axion-backend
           sudo systemctl restart nginx
           
@@ -242,6 +295,9 @@ jobs:
           for i in {1..10}; do
               if curl -sf http://localhost/health > /dev/null 2>&1; then
                   echo "Health check passed!"
+                  if [ "${DEPLOY_STORYBOOK}" = "true" ]; then
+                    echo "Storybook available at port 6006"
+                  fi
                   exit 0
               fi
               echo "Waiting for service... ($i/10)"
@@ -251,10 +307,16 @@ jobs:
           exit 1
           DEPLOY_SCRIPT
 
+          # Determine if we should deploy storybook
+          DEPLOY_STORYBOOK="false"
+          if [ "${{ inputs.environment }}" = "staging" ] || [ "${{ github.ref }}" = "refs/heads/develop" ]; then
+            DEPLOY_STORYBOOK="true"
+          fi
+
           # Execute deployment via gcloud compute ssh
           gcloud compute ssh ${{ env.GCE_INSTANCE }} \
             --zone=${{ env.GCE_ZONE }} \
-            --command="RELEASE_SHA=${{ github.sha }} GCS_BUCKET=${{ env.GCS_BUCKET }} bash -s" \
+            --command="RELEASE_SHA=${{ github.sha }} GCS_BUCKET=${{ env.GCS_BUCKET }} DEPLOY_STORYBOOK=${DEPLOY_STORYBOOK} bash -s" \
             < /tmp/remote-deploy.sh
 
       - name: Notify deployment status

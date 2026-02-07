@@ -15,10 +15,10 @@ This directory contains all configuration and scripts needed to deploy Axion on 
 │  │  │ (proxy)  │  │   (FastAPI)    │  │                         │ │  │
 │  │  └────┬─────┘  └────────────────┘  └───────────┬─────────────┘ │  │
 │  │       │                                         │               │  │
-│  │  ┌────┴─────┐                                   │               │  │
-│  │  │ Frontend │                                   │               │  │
-│  │  │ (Static) │                                   │               │  │
-│  │  └──────────┘                                   │               │  │
+│  │  ┌────┴─────┐  ┌────────────┐                   │               │  │
+│  │  │ Frontend │  │ Storybook  │ (dev/staging)     │               │  │
+│  │  │ (Static) │  │  :6006     │                   │               │  │
+│  │  └──────────┘  └────────────┘                   │               │  │
 │  └─────────────────────────────────────────────────┼───────────────┘  │
 │                                                    │                  │
 │  ┌─────────────────────────┐  ┌───────────────────┴────────────────┐ │
@@ -131,7 +131,8 @@ gh workflow run deploy-gcp.yml -f environment=production
 ```
 deploy/gcp/
 ├── README.md           # This file
-├── nginx.conf          # nginx configuration
+├── nginx.conf          # nginx configuration (production)
+├── nginx-dev.conf      # nginx configuration (staging/dev with Storybook)
 ├── vm-setup.sh         # VM initial setup script
 ├── deploy.sh           # Deployment script
 ├── env.template        # Environment variables template
@@ -143,11 +144,41 @@ deploy/gcp/
 
 The VM runs the following services:
 
-| Service         | Port | Description                        |
-| --------------- | ---- | ---------------------------------- |
-| nginx           | 80   | Reverse proxy for frontend and API |
-| axion-backend   | 8000 | FastAPI backend (internal only)    |
-| cloud-sql-proxy | 5432 | Cloud SQL connection proxy         |
+| Service         | Port | Description                              |
+| --------------- | ---- | ---------------------------------------- |
+| nginx           | 80   | Reverse proxy for frontend and API       |
+| nginx           | 6006 | Storybook (staging/dev environment only) |
+| axion-backend   | 8000 | FastAPI backend (internal only)          |
+| cloud-sql-proxy | 5432 | Cloud SQL connection proxy               |
+
+## Storybook Deployment (Development Environment)
+
+Storybook is automatically deployed when:
+- Deploying to `staging` environment
+- Pushing to `develop` branch
+
+### Manual Deployment with Storybook
+
+```bash
+gh workflow run deploy-gcp.yml -f environment=staging -f deploy_storybook=true
+```
+
+### Access Storybook
+
+After deployment to staging, access Storybook at:
+```
+http://<VM_EXTERNAL_IP>:6006
+```
+
+### Firewall Configuration
+
+For staging VMs, ensure the `axion-web-dev` tag is applied to enable port 6006 access:
+
+```bash
+gcloud compute instances add-tags axion-vm \
+  --zone=asia-northeast1-a \
+  --tags=axion-web-dev
+```
 
 ## Maintenance
 

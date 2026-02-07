@@ -79,6 +79,42 @@ OBJECT_STORE_PROVIDER=local
 OBJECT_STORE_LOCAL_PATH=./data/object_store
 ```
 
+## UI 開発 (Storybook)
+
+Axion の UI コンポーネントは Storybook で開発・確認できます。
+
+### Docker Compose で起動
+
+```bash
+# Storybook のみ起動 (port: 6006)
+make storybook-dev
+
+# または全サービスと一緒に起動
+make start-compose-dev
+```
+
+Storybook は http://localhost:6006 でアクセスできます。
+
+### ローカルで起動 (Docker 不要)
+
+```bash
+cd src/axion_ui
+pnpm install
+pnpm storybook
+```
+
+### Storybook のビルド
+
+```bash
+# 静的ファイルとしてビルド
+make storybook-build
+
+# または直接
+cd src/axion_ui && pnpm build-storybook
+```
+
+ビルド成果物は `src/axion_ui/storybook-static/` に出力されます。
+
 ## API 概要
 
 ### 管理階層

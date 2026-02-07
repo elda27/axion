@@ -94,6 +94,20 @@ resource "google_compute_firewall" "allow_http" {
   target_tags   = ["axion-web"]
 }
 
+# Storybook port for development environment
+resource "google_compute_firewall" "allow_storybook" {
+  name    = "axion-allow-storybook"
+  network = google_compute_network.axion.name
+
+  allow {
+    protocol = "tcp"
+    ports    = ["6006"]
+  }
+
+  source_ranges = ["0.0.0.0/0"]
+  target_tags   = ["axion-web-dev"]
+}
+
 resource "google_compute_firewall" "allow_ssh" {
   name    = "axion-allow-ssh"
   network = google_compute_network.axion.name

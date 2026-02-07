@@ -37,11 +37,13 @@ useradd -m -s /bin/bash axion || true
 # Create application directories
 mkdir -p /opt/axion
 mkdir -p /var/www/axion-ui
+mkdir -p /var/www/axion-storybook
 mkdir -p /var/log/axion
 
 # Set permissions
 chown -R axion:axion /opt/axion
 chown -R axion:axion /var/www/axion-ui
+chown -R axion:axion /var/www/axion-storybook
 chown -R axion:axion /var/log/axion
 
 # Configure nginx
