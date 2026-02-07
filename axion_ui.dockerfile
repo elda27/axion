@@ -14,8 +14,12 @@ RUN pnpm install --frozen-lockfile
 # Copy source code
 COPY src/axion_ui/ ./
 
-# Expose Storybook port
-EXPOSE 6006
+# Build argument for production builds
+ARG BUILD_MODE=development
+RUN if [ "$BUILD_MODE" = "production" ]; then pnpm build; fi
 
-# Run Storybook dev server
-CMD ["pnpm", "storybook"]
+# Expose ports (Vite dev: 5173, Storybook: 6006)
+EXPOSE 5173 6006
+
+# Default command (can be overridden)
+CMD ["pnpm", "dev", "--host", "0.0.0.0"]
