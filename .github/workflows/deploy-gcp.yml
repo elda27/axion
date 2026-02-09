@@ -53,7 +53,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          uv sync --frozen
+          uv sync --frozen --all-groups
 
       - name: Run linting
         run: |
