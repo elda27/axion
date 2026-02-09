@@ -6,9 +6,9 @@ from typing import Any
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from axion.schemas.artifact import ArtifactCreate, ArtifactKind
 from axion_server.models.entities import Artifact
 from axion_server.repositories.base import generate_id, utc_now
-from axion.schemas.artifact import ArtifactCreate, ArtifactKind
 
 
 class ArtifactRepository:

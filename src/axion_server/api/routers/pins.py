@@ -1,9 +1,10 @@
 """Pin API router"""
 
 from fastapi import APIRouter, HTTPException, Path, status
+from sqlalchemy.sql.annotation import Annotated
 
-from axion_server.api.deps import BatchRepo, RunPath, RunPinRepo
 from axion.schemas import PinCreate, PinResponse, PinType
+from axion_server.api.deps import BatchRepo, RunPath, RunPinRepo
 
 router = APIRouter(tags=["Pins"])
 
@@ -44,14 +45,17 @@ async def create_pin(
     return PinResponse.model_validate(pin)
 
 
+PinTypeFromPath = Annotated[PinType, Path(...)]
+
+
 @router.delete(
     "/runs/{run_id}/pins/{pin_type}",
     status_code=status.HTTP_204_NO_CONTENT,
 )
 async def delete_pin(
     run: RunPath,
-    pin_type: PinType = Path(),
-    repo: RunPinRepo = ...,
+    pin_type: PinTypeFromPath,
+    repo: RunPinRepo,
 ) -> None:
     """Delete a pin from a run"""
     deleted = await repo.delete_by_run_and_type(run.run_id, pin_type)

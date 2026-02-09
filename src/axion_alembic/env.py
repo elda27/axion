@@ -1,10 +1,9 @@
 import os
 from logging.config import fileConfig
 
+from alembic import context
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, pool
-
-from alembic import context
 
 # Load environment variables from .env file
 load_dotenv()

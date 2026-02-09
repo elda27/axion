@@ -2,8 +2,8 @@
 
 from fastapi import APIRouter, status
 
-from axion_server.api.deps import OrgPath, OrgRepo
 from axion.schemas import CursorPaginatedResponse, OrgCreate, OrgResponse
+from axion_server.api.deps import OrgPath, OrgRepo
 
 router = APIRouter(prefix="/orgs", tags=["Organizations"])
 

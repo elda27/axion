@@ -4,8 +4,8 @@ import json
 
 from fastapi import APIRouter
 
-from axion_server.api.deps import BatchPath, CIRepo, RunPath
 from axion.schemas import ComparisonIndicatorResponse, CursorPaginatedResponse
+from axion_server.api.deps import BatchPath, CIRepo, RunPath
 
 router = APIRouter(tags=["Comparison Indicators"])
 

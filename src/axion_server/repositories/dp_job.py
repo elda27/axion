@@ -3,9 +3,9 @@
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from axion.schemas.dp_job import DPJobCreate, DPJobStatus
 from axion_server.models.entities import DPJob
 from axion_server.repositories.base import generate_id, utc_now
-from axion.schemas.dp_job import DPJobCreate, DPJobStatus
 
 
 class DPJobRepository:

@@ -2,7 +2,6 @@
 
 from fastapi import APIRouter, status
 
-from axion_server.api.deps import BatchPath, RunPath, RunRepo
 from axion.schemas import (
     CursorPaginatedResponse,
     RunCreate,
@@ -12,6 +11,7 @@ from axion.schemas import (
     RunUpdate,
 )
 from axion.schemas.run import OthersSection, RecentCollapsed, RunBriefResponse
+from axion_server.api.deps import BatchPath, RunPath, RunRepo
 
 router = APIRouter(tags=["Runs"])
 

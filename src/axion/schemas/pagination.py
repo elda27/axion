@@ -1,6 +1,6 @@
 """Pagination schemas"""
 
-from typing import Generic, TypeVar
+from typing import TypeVar
 
 from pydantic import BaseModel, Field
 
@@ -14,7 +14,7 @@ class PaginationParams(BaseModel):
     cursor: str | None = None
 
 
-class CursorPaginatedResponse(BaseModel, Generic[T]):
+class CursorPaginatedResponse[T](BaseModel):
     """Cursor-based paginated response"""
 
     items: list[T]

@@ -2,13 +2,13 @@
 
 import json
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 
-class ArtifactKind(str, Enum):
+class ArtifactKind(StrEnum):
     """Artifact kind enumeration"""
 
     URL = "url"
@@ -18,7 +18,7 @@ class ArtifactKind(str, Enum):
     INLINE_JSON = "inline_json"
 
 
-class ArtifactType(str, Enum):
+class ArtifactType(StrEnum):
     """Artifact type enumeration"""
 
     LANGFUSE_TRACE = "langfuse_trace"

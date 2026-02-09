@@ -2,8 +2,8 @@
 
 from fastapi import APIRouter, status
 
-from axion_server.api.deps import OrgPath, ProjectPath, ProjectRepo
 from axion.schemas import CursorPaginatedResponse, ProjectCreate, ProjectResponse
+from axion_server.api.deps import OrgPath, ProjectPath, ProjectRepo
 
 router = APIRouter(tags=["Projects"])
 

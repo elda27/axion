@@ -3,9 +3,9 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from axion.schemas.project import ProjectCreate
 from axion_server.models.entities import Project
 from axion_server.repositories.base import generate_id, utc_now
-from axion.schemas.project import ProjectCreate
 
 
 class ProjectRepository:

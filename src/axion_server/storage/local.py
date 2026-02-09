@@ -1,7 +1,6 @@
 """Local filesystem object storage implementation"""
 
 import json
-import os
 from pathlib import Path
 from typing import Any
 from urllib.parse import quote

@@ -1,12 +1,12 @@
 """Run pin schemas"""
 
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 
 from pydantic import BaseModel, Field
 
 
-class PinType(str, Enum):
+class PinType(StrEnum):
     """Pin type enumeration"""
 
     CHAMPION = "champion"

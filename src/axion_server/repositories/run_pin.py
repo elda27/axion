@@ -3,9 +3,9 @@
 from sqlalchemy import and_, delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from axion.schemas.run_pin import PinType
 from axion_server.models.entities import RunPin
 from axion_server.repositories.base import generate_id, utc_now
-from axion.schemas.run_pin import PinType
 
 
 class RunPinRepository:

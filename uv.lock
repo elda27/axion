@@ -303,6 +303,10 @@ dev = [
 ]
 
 [package.dev-dependencies]
+dev = [
+    { name = "pytest" },
+    { name = "ruff" },
+]
 google = [
     { name = "google-cloud-storage" },
 ]
@@ -334,6 +338,10 @@ requires-dist = [
 provides-extras = ["dev"]
 
 [package.metadata.requires-dev]
+dev = [
+    { name = "pytest", specifier = ">=9.0.2" },
+    { name = "ruff", specifier = ">=0.15.0" },
+]
 google = [{ name = "google-cloud-storage", specifier = ">=3.9.0" }]
 
 [[package]]

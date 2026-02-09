@@ -1,13 +1,12 @@
 """Embedded DP Runner for computing Quality Metrics and Comparison Indicators"""
 
-import json
 import logging
 import traceback
-from collections import defaultdict
 from dataclasses import dataclass
 from statistics import mean, median
 from typing import Any
 
+from axion.schemas import DPJobMode, DPJobStatus, QualityMetricSource
 from axion_server.database import get_session
 from axion_server.models.entities import Artifact, Run
 from axion_server.repositories import (
@@ -18,7 +17,6 @@ from axion_server.repositories import (
     RunPinRepository,
     RunRepository,
 )
-from axion.schemas import DPJobMode, DPJobStatus, QualityMetricSource
 from axion_server.storage import get_object_store
 
 logger = logging.getLogger(__name__)

@@ -5,8 +5,8 @@ from typing import Any
 
 from fastapi import APIRouter, HTTPException, Path, status
 
-from axion_server.api.deps import ArtifactRepo, RunPath
 from axion.schemas import ArtifactCreate, ArtifactResponse, CursorPaginatedResponse
+from axion_server.api.deps import ArtifactRepo, RunPath
 
 router = APIRouter(tags=["Artifacts"])
 

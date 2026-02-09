@@ -6,9 +6,9 @@ from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from axion.schemas.run import RunCreate, RunStatus, RunUpdate
 from axion_server.models.entities import Run, RunPin
 from axion_server.repositories.base import generate_id, utc_now
-from axion.schemas.run import RunCreate, RunStatus, RunUpdate
 
 
 class RunRepository:

@@ -1,12 +1,12 @@
 """DP Job schemas"""
 
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 
 from pydantic import BaseModel, Field
 
 
-class DPJobStatus(str, Enum):
+class DPJobStatus(StrEnum):
     """DP Job status enumeration"""
 
     QUEUED = "queued"
@@ -16,7 +16,7 @@ class DPJobStatus(str, Enum):
     CANCELED = "canceled"
 
 
-class DPJobMode(str, Enum):
+class DPJobMode(StrEnum):
     """DP Job mode enumeration"""
 
     ACTIVE_ONLY = "active_only"

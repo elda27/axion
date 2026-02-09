@@ -2,13 +2,13 @@
 
 import json
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from pydantic import BaseModel, Field, field_validator
 
 
-class RunStatus(str, Enum):
+class RunStatus(StrEnum):
     """Run status enumeration"""
 
     ACTIVE = "active"

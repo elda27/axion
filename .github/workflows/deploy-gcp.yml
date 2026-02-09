@@ -53,7 +53,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          uv sync --frozen --all-groups
+          uv sync --frozen --all-extras
 
       - name: Run linting
         run: |
@@ -99,6 +99,10 @@ jobs:
         with:
           version: ${{ env.PNPM_VERSION }}
 
+      - name: Install frontend dependencies
+        run: |
+          pnpm install --frozen-lockfile
+
       - name: Build Backend
         run: |
           # Create backend package
@@ -111,7 +115,6 @@ jobs:
       - name: Build Frontend
         working-directory: src/axion_ui
         run: |
-          pnpm install --frozen-lockfile
           pnpm build
 
       - name: Build Storybook

@@ -6,9 +6,9 @@ from typing import Any
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from axion.schemas.quality_metric import QualityMetricSource
 from axion_server.models.entities import QualityMetric
 from axion_server.repositories.base import generate_id, utc_now
-from axion.schemas.quality_metric import QualityMetricSource
 
 
 class QualityMetricRepository:

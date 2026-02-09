@@ -3,9 +3,9 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from axion.schemas.org import OrgCreate
 from axion_server.models.entities import Org
 from axion_server.repositories.base import generate_id, utc_now
-from axion.schemas.org import OrgCreate
 
 
 class OrgRepository:
