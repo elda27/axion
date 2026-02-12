@@ -24,6 +24,10 @@ on:
         description: 'Ansible tags (comma-separated, leave empty for all)'
         required: false
         type: string
+      ci_run_id:
+        description: 'CI workflow run ID (use artifacts from CI instead of building)'
+        required: false
+        type: string
 
 env:
   GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
@@ -37,11 +41,11 @@ env:
   PNPM_VERSION: '10'
 
 jobs:
-  # Build artifacts (only for deploy playbook)
+  # Build artifacts (only for deploy playbook, skip if using CI artifacts)
   build:
     name: Build Applications
     runs-on: ubuntu-latest
-    if: inputs.playbook == 'deploy'
+    if: inputs.playbook == 'deploy' && inputs.ci_run_id == ''
     outputs:
       backend_artifact: ${{ steps.upload-backend.outputs.artifact-id }}
       frontend_artifact: ${{ steps.upload-frontend.outputs.artifact-id }}
@@ -116,6 +120,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
+      actions: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -160,6 +165,8 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: dist/
+          run-id: ${{ inputs.ci_run_id || github.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create dynamic inventory
         run: |

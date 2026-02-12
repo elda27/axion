@@ -1,10 +1,6 @@
 name: Deploy to GCP
 
 on:
-  push:
-    branches:
-      - main
-      - develop
   workflow_dispatch:
     inputs:
       environment:
@@ -18,8 +14,12 @@ on:
       deploy_storybook:
         description: 'Deploy Storybook (staging only)'
         required: false
-        default: true
-        type: boolean
+        default: 'false'
+        type: string
+      ci_run_id:
+        description: 'CI workflow run ID (for artifact download)'
+        required: false
+        type: string
 
 env:
   GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
@@ -28,151 +28,47 @@ env:
   GCE_ZONE: ${{ vars.GCE_ZONE || 'asia-northeast1-a' }}
   CLOUD_SQL_INSTANCE: ${{ secrets.CLOUD_SQL_INSTANCE }}
   GCS_BUCKET: ${{ vars.GCS_BUCKET || 'axion-artifacts' }}
-  PYTHON_VERSION: '3.12'
-  NODE_VERSION: '22'
-  PNPM_VERSION: '10'
 
 jobs:
-  # Run tests before deployment
-  test:
-    name: Run Tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v4
-        with:
-          version: "latest"
-
-      - name: Install dependencies
-        run: |
-          uv sync --frozen --all-extras
-
-      - name: Run linting
-        run: |
-          uv run ruff check src/
-
-      - name: Run type checking
-        run: |
-          uv run mypy src/
-
-      - name: Run tests
-        run: |
-          uv run pytest tests/ -v --cov=src
-
-  # Build and package applications
-  build:
-    name: Build Applications
-    runs-on: ubuntu-latest
-    needs: test
-    outputs:
-      backend_artifact: ${{ steps.upload-backend.outputs.artifact-id }}
-      frontend_artifact: ${{ steps.upload-frontend.outputs.artifact-id }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v4
-        with:
-          version: "latest"
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Install frontend dependencies
-        run: |
-          pnpm install --frozen-lockfile
-
-      - name: Build Backend
-        run: |
-          # Create backend package
-          mkdir -p dist/backend
-          cp -r src/axion src/axion_server src/axion_alembic dist/backend/
-          cp pyproject.toml uv.lock alembic.ini dist/backend/
-          cp -r deploy dist/backend/
-          cd dist && tar -czf axion-backend.tar.gz backend/
-
-      - name: Build Frontend
-        working-directory: src/axion_ui
-        run: |
-          pnpm build
-
-      - name: Build Storybook
-        if: inputs.environment == 'staging' || github.ref == 'refs/heads/develop'
-        working-directory: src/axion_ui
-        run: |
-          pnpm build-storybook
-
-      - name: Package Frontend
-        run: |
-          mkdir -p dist
-          cd src/axion_ui/dist && tar -czf ../../../dist/axion-frontend.tar.gz .
-
-      - name: Package Storybook
-        if: inputs.environment == 'staging' || github.ref == 'refs/heads/develop'
-        run: |
-          mkdir -p dist
-          cd src/axion_ui/storybook-static && tar -czf ../../../dist/axion-storybook.tar.gz .
-
-      - name: Upload Backend Artifact
-        id: upload-backend
-        uses: actions/upload-artifact@v4
-        with:
-          name: axion-backend
-          path: dist/axion-backend.tar.gz
-          retention-days: 7
-
-      - name: Upload Frontend Artifact
-        id: upload-frontend
-        uses: actions/upload-artifact@v4
-        with:
-          name: axion-frontend
-          path: dist/axion-frontend.tar.gz
-          retention-days: 7
-
-      - name: Upload Storybook Artifact
-        if: inputs.environment == 'staging' || github.ref == 'refs/heads/develop'
-        id: upload-storybook
-        uses: actions/upload-artifact@v4
-        with:
-          name: axion-storybook
-          path: dist/axion-storybook.tar.gz
-          retention-days: 7
-
-  # Deploy to GCP
   deploy:
     name: Deploy to GCP
     runs-on: ubuntu-latest
-    needs: build
     environment: 
-      name: ${{ inputs.environment || 'production' }}
+      name: ${{ inputs.environment }}
       url: https://${{ vars.APP_DOMAIN }}
     permissions:
       contents: read
       id-token: write
+      actions: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Download Backend Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: axion-backend
+          path: dist/
+          run-id: ${{ inputs.ci_run_id || github.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download Frontend Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: axion-frontend
+          path: dist/
+          run-id: ${{ inputs.ci_run_id || github.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download Storybook Artifact
+        if: inputs.deploy_storybook == 'true'
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: axion-storybook
+          path: dist/
+          run-id: ${{ inputs.ci_run_id || github.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
@@ -185,26 +81,7 @@ jobs:
         with:
           project_id: ${{ env.GCP_PROJECT_ID }}
 
-      - name: Download Backend Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: axion-backend
-          path: dist/
-
-      - name: Download Frontend Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: axion-frontend
-          path: dist/
-
-      - name: Download Storybook Artifact
-        if: inputs.environment == 'staging' || github.ref == 'refs/heads/develop'
-        uses: actions/download-artifact@v4
-        with:
-          name: axion-storybook
-          path: dist/
-
-      - name: Upload artifacts to GCS (staging)
+      - name: Upload artifacts to GCS
         run: |
           gsutil cp dist/axion-backend.tar.gz gs://${{ env.GCS_BUCKET }}-deploy/releases/${{ github.sha }}/
           gsutil cp dist/axion-frontend.tar.gz gs://${{ env.GCS_BUCKET }}-deploy/releases/${{ github.sha }}/
@@ -310,34 +187,31 @@ jobs:
           exit 1
           DEPLOY_SCRIPT
 
-          # Determine if we should deploy storybook
-          DEPLOY_STORYBOOK="false"
-          if [ "${{ inputs.environment }}" = "staging" ] || [ "${{ github.ref }}" = "refs/heads/develop" ]; then
-            DEPLOY_STORYBOOK="true"
-          fi
-
           # Execute deployment via gcloud compute ssh
           gcloud compute ssh ${{ env.GCE_INSTANCE }} \
             --zone=${{ env.GCE_ZONE }} \
-            --command="RELEASE_SHA=${{ github.sha }} GCS_BUCKET=${{ env.GCS_BUCKET }} DEPLOY_STORYBOOK=${DEPLOY_STORYBOOK} bash -s" \
+            --command="RELEASE_SHA=${{ github.sha }} GCS_BUCKET=${{ env.GCS_BUCKET }} DEPLOY_STORYBOOK=${{ inputs.deploy_storybook }} bash -s" \
             < /tmp/remote-deploy.sh
 
       - name: Notify deployment status
         if: always()
         run: |
           if [ "${{ job.status }}" == "success" ]; then
-            echo "✅ Deployment successful!"
-            echo "Release: ${{ github.sha }}"
-            echo "Environment: ${{ inputs.environment || 'production' }}"
+            echo "## ✅ Deployment Successful" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "| Setting | Value |" >> $GITHUB_STEP_SUMMARY
+            echo "|---------|-------|" >> $GITHUB_STEP_SUMMARY
+            echo "| Release | ${{ github.sha }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| Environment | ${{ inputs.environment }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| Storybook | ${{ inputs.deploy_storybook }} |" >> $GITHUB_STEP_SUMMARY
           else
-            echo "❌ Deployment failed!"
+            echo "## ❌ Deployment Failed" >> $GITHUB_STEP_SUMMARY
           fi
 
-  # Rollback job (manual trigger)
   rollback:
     name: Rollback Deployment
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' && failure()
+    if: failure()
     needs: deploy
     permissions:
       contents: read
