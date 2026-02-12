@@ -14,12 +14,12 @@ def _build_qm_response(qm) -> QualityMetricResponse:
     """Build quality metric response"""
     value = json.loads(qm.value_json) if qm.value_json else None
     return QualityMetricResponse(
-        qm_id=qm.qm_id,
-        run_id=qm.run_id,
+        qmId=qm.qm_id,
+        runId=qm.run_id,
         key=qm.key,
         value=value,
         source=qm.source,
-        computed_at=qm.computed_at,
+        computedAt=qm.computed_at,
         version=qm.version,
     )
 

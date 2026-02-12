@@ -3,8 +3,8 @@
 import json
 from typing import Any
 
-from google.cloud import storage  # type: ignore[import-untyped]
-from google.oauth2 import service_account  # type: ignore[import-untyped]
+from google.cloud import storage
+from google.oauth2 import service_account
 
 from axion_server.gateways.storage.base import ObjectRef, ObjectStore
 

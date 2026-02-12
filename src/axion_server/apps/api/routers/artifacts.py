@@ -3,7 +3,7 @@
 import json
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, Path, status
+from fastapi import APIRouter, HTTPException, status
 
 from axion_server.apps.api.deps import ArtifactRepo, RunPath
 from axion_server.shared.domain import (
@@ -21,14 +21,14 @@ def _build_artifact_response(artifact: Any, repo: ArtifactRepo) -> ArtifactRespo
     meta = json.loads(artifact.meta_json) if artifact.meta_json else {}
 
     return ArtifactResponse(
-        artifact_id=artifact.artifact_id,
-        run_id=artifact.run_id,
+        artifactId=artifact.artifact_id,
+        runId=artifact.run_id,
         kind=artifact.kind,
         type=artifact.type,
         label=artifact.label,
         payload=payload,
         meta=meta,
-        created_at=artifact.created_at,
+        createdAt=artifact.created_at,
     )
 
 
@@ -73,8 +73,8 @@ async def list_artifacts(
     status_code=status.HTTP_204_NO_CONTENT,
 )
 async def delete_artifact(
-    artifact_id: str = Path(),
-    repo: ArtifactRepo = ...,
+    artifact_id: str,
+    repo: ArtifactRepo,
 ) -> None:
     """Delete an artifact"""
     deleted = await repo.delete(artifact_id)

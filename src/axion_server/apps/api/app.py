@@ -2,6 +2,7 @@
 
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from typing import Any, cast
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -32,7 +33,7 @@ def create_app() -> FastAPI:
 
     # CORS middleware
     app.add_middleware(
-        CORSMiddleware,
+        middleware_class=cast(Any, CORSMiddleware),
         allow_origins=["*"],
         allow_credentials=True,
         allow_methods=["*"],

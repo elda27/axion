@@ -116,4 +116,5 @@ class QualityMetricRepository:
         result = await self.session.execute(
             delete(QualityMetric).where(QualityMetric.run_id == run_id)
         )
-        return result.rowcount
+        rowcount = getattr(result, "rowcount", 0)
+        return int(rowcount or 0)

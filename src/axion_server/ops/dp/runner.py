@@ -26,14 +26,6 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
-class CaseScore:
-    """Score for a single case within a run"""
-
-    case_id: str
-    score: float
-
-
-@dataclass
 class RunScores:
     """All case scores for a run"""
 
@@ -56,82 +48,73 @@ class DPRunner:
             pin_repo = RunPinRepository(session)
 
             # Get the job
-            job = await job_repo.get(job_id)
+            job = await job_repo.get_by_id(job_id)
             if not job:
                 logger.error(f"Job not found: {job_id}")
                 return
 
             # Mark as running
-            await job_repo.update(job_id, status=DPJobStatus.RUNNING)
+            await job_repo.update_status(job_id, status=DPJobStatus.RUNNING)
 
             try:
-                # Get the run
-                run = await run_repo.get(job.run_id)
-                if not run:
-                    raise ValueError(f"Run not found: {job.run_id}")
+                include_garbage = job.mode == DPJobMode.INCLUDE_GARBAGE.value
 
-                # Get all runs in the batch for comparison
-                all_runs = await run_repo.list_by_batch(
-                    run.batch_id, limit=1000, offset=0
+                # Get runs to compute in batch
+                all_runs = await run_repo.list_active_for_dp(
+                    job.batch_id,
+                    include_garbage=include_garbage,
                 )
+                if not all_runs:
+                    await job_repo.update_status(job_id, status=DPJobStatus.SUCCEEDED)
+                    logger.info(f"DP job completed with no runs: {job_id}")
+                    return
 
                 # Get champion run if exists
-                champion_run: Run | None = None
-                champion_pin = await pin_repo.get_by_batch_and_kind(
-                    run.batch_id, "champion"
-                )
-                if champion_pin:
-                    champion_run = await run_repo.get(champion_pin.run_id)
-
-                # Compute based on mode
-                if job.mode in (DPJobMode.FULL, DPJobMode.QM_ONLY):
-                    await DPRunner._compute_qm(run, artifact_repo, qm_repo)
-
-                if job.mode in (DPJobMode.FULL, DPJobMode.CI_ONLY):
-                    # Get scores for all runs
-                    all_run_scores: list[RunScores] = []
-                    for r in all_runs:
-                        scores = await DPRunner._extract_scores(r, artifact_repo)
-                        if scores:
-                            all_run_scores.append(scores)
-
-                    # Get current run scores
-                    run_scores = next(
-                        (rs for rs in all_run_scores if rs.run_id == run.id),
+                champion_scores: RunScores | None = None
+                champion_run_id = await pin_repo.get_champion_run_id(job.batch_id)
+                if champion_run_id:
+                    champion_run = next(
+                        (r for r in all_runs if r.run_id == champion_run_id),
                         None,
                     )
-
-                    # Get champion scores
-                    champion_scores: RunScores | None = None
                     if champion_run:
-                        champion_scores = next(
-                            (
-                                rs
-                                for rs in all_run_scores
-                                if rs.run_id == champion_run.id
-                            ),
-                            None,
+                        champion_scores = await DPRunner._extract_scores(
+                            champion_run,
+                            artifact_repo,
                         )
 
+                # Compute QMs for each run and gather scores for CI
+                all_run_scores: list[RunScores] = []
+                for run in all_runs:
+                    if bool(job.recompute):
+                        await qm_repo.delete_by_run(run.run_id)
+                        await ci_repo.delete_by_run(run.run_id)
+
+                    await DPRunner._compute_qm(run, artifact_repo, qm_repo)
+
+                    run_scores = await DPRunner._extract_scores(run, artifact_repo)
                     if run_scores:
-                        await DPRunner._compute_ci(
-                            run_scores,
-                            champion_scores,
-                            all_run_scores,
-                            [r.id for r in all_runs],
-                            ci_repo,
-                        )
+                        all_run_scores.append(run_scores)
+
+                # Compute CIs for each run
+                for run_scores in all_run_scores:
+                    await DPRunner._compute_ci(
+                        run_scores,
+                        champion_scores,
+                        all_run_scores,
+                        ci_repo,
+                    )
 
                 # Mark as complete
-                await job_repo.update(job_id, status=DPJobStatus.COMPLETED)
+                await job_repo.update_status(job_id, status=DPJobStatus.SUCCEEDED)
                 logger.info(f"DP job completed: {job_id}")
 
-            except Exception as e:
+            except Exception as error:
                 logger.exception(f"DP job failed: {job_id}")
-                await job_repo.update(
+                await job_repo.update_status(
                     job_id,
                     status=DPJobStatus.FAILED,
-                    error_message=str(e),
+                    error_text=str(error),
                 )
 
     @staticmethod
@@ -141,8 +124,8 @@ class DPRunner:
     ) -> RunScores | None:
         """Extract scores from run artifacts"""
         # Get score artifacts
-        artifacts = await artifact_repo.list_by_run(run.id, limit=100, offset=0)
-        score_artifacts = [a for a in artifacts if a.kind == "score"]
+        artifacts, _ = await artifact_repo.list_by_run(run.run_id, limit=100)
+        score_artifacts = [a for a in artifacts if a.type in ("evaluation", "score")]
 
         if not score_artifacts:
             return None
@@ -162,10 +145,10 @@ class DPRunner:
                             cases[case_id] = float(score)
             except Exception as e:
                 logger.warning(
-                    f"Failed to extract score from artifact {artifact.id}: {e}"
+                    f"Failed to extract score from artifact {artifact.artifact_id}: {e}"
                 )
 
-        return RunScores(run_id=run.id, cases=cases) if cases else None
+        return RunScores(run_id=run.run_id, cases=cases) if cases else None
 
     @staticmethod
     async def _extract_raw_metrics(
@@ -173,7 +156,7 @@ class DPRunner:
         artifact_repo: ArtifactRepository,
     ) -> dict[str, Any]:
         """Extract raw metrics from run artifacts"""
-        artifacts = await artifact_repo.list_by_run(run.id, limit=100, offset=0)
+        artifacts, _ = await artifact_repo.list_by_run(run.run_id, limit=100)
         metrics_artifacts = [a for a in artifacts if a.kind == "metrics"]
 
         raw_metrics: dict[str, Any] = {}
@@ -186,7 +169,7 @@ class DPRunner:
                     raw_metrics.update(payload)
             except Exception as e:
                 logger.warning(
-                    f"Failed to extract metrics from artifact {artifact.id}: {e}"
+                    f"Failed to extract metrics from artifact {artifact.artifact_id}: {e}"
                 )
 
         return raw_metrics
@@ -207,31 +190,31 @@ class DPRunner:
             # Mean score
             mean_score = mean(scores)
             await qm_repo.upsert(
-                run_id=run.id,
+                run_id=run.run_id,
                 key="mean_score",
-                source=QualityMetricSource.SYSTEM,
+                source=QualityMetricSource.DERIVED,
                 value=round(mean_score, 6),
             )
 
             # Min/max scores
             await qm_repo.upsert(
-                run_id=run.id,
+                run_id=run.run_id,
                 key="min_score",
-                source=QualityMetricSource.SYSTEM,
+                source=QualityMetricSource.DERIVED,
                 value=round(min(scores), 6),
             )
             await qm_repo.upsert(
-                run_id=run.id,
+                run_id=run.run_id,
                 key="max_score",
-                source=QualityMetricSource.SYSTEM,
+                source=QualityMetricSource.DERIVED,
                 value=round(max(scores), 6),
             )
 
             # Case count
             await qm_repo.upsert(
-                run_id=run.id,
+                run_id=run.run_id,
                 key="case_count",
-                source=QualityMetricSource.SYSTEM,
+                source=QualityMetricSource.DERIVED,
                 value=len(scores),
             )
 
@@ -240,7 +223,7 @@ class DPRunner:
         for key, value in raw_metrics.items():
             if isinstance(value, (int, float, bool)):
                 await qm_repo.upsert(
-                    run_id=run.id,
+                    run_id=run.run_id,
                     key=key,
                     source=QualityMetricSource.RAW,
                     value=value,
@@ -251,7 +234,6 @@ class DPRunner:
         run_scores: RunScores,
         champion_scores: RunScores | None,
         all_run_scores: list[RunScores],
-        all_run_ids: list[str],
         ci_repo: ComparisonIndicatorRepository,
     ) -> None:
         """Compute Comparison Indicators for a run"""

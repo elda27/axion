@@ -103,11 +103,11 @@ async def get_runs_summary(
 
     return RunSummaryResponse(
         champion=RunBriefResponse.model_validate(champion) if champion else None,
-        recent_collapsed=RecentCollapsed(
+        recentCollapsed=RecentCollapsed(
             default_open=False,
             runs=[RunBriefResponse.model_validate(r) for r in recent],
         ),
-        user_selected=[RunBriefResponse.model_validate(r) for r in user_selected],
+        userSelected=[RunBriefResponse.model_validate(r) for r in user_selected],
         others=OthersSection(
             cursor=next_cursor,
             runs=[RunBriefResponse.model_validate(r) for r in others],

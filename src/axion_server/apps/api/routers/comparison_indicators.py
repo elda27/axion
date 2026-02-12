@@ -17,12 +17,12 @@ def _build_ci_response(ci) -> ComparisonIndicatorResponse:
     """Build comparison indicator response"""
     value = json.loads(ci.value_json) if ci.value_json else None
     return ComparisonIndicatorResponse(
-        ci_id=ci.ci_id,
-        run_id=ci.run_id,
+        ciId=ci.ci_id,
+        runId=ci.run_id,
         key=ci.key,
         value=value,
-        baseline_ref=ci.baseline_ref,
-        computed_at=ci.computed_at,
+        baselineRef=ci.baseline_ref,
+        computedAt=ci.computed_at,
         version=ci.version,
     )
 

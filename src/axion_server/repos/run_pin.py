@@ -62,7 +62,8 @@ class RunPinRepository:
                 )
             )
         )
-        return result.rowcount > 0
+        rowcount = getattr(result, "rowcount", 0)
+        return int(rowcount or 0) > 0
 
     async def delete_champion(self, batch_id: str) -> bool:
         """Delete champion pin for a batch"""
@@ -74,7 +75,8 @@ class RunPinRepository:
                 )
             )
         )
-        return result.rowcount > 0
+        rowcount = getattr(result, "rowcount", 0)
+        return int(rowcount or 0) > 0
 
     async def get_champion_run_id(self, batch_id: str) -> str | None:
         """Get champion run ID for a batch"""

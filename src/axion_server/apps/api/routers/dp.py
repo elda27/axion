@@ -1,6 +1,6 @@
 """DP Job API router"""
 
-from fastapi import APIRouter, BackgroundTasks, HTTPException, Path, status
+from fastapi import APIRouter, BackgroundTasks, HTTPException, status
 
 from axion_server.apps.api.deps import BatchPath, DPJobRepo
 from axion_server.ops.dp import DPRunner
@@ -12,16 +12,16 @@ router = APIRouter(tags=["DP Jobs"])
 def _build_dp_job_response(job) -> DPJobResponse:
     """Build DP job response"""
     return DPJobResponse(
-        job_id=job.job_id,
-        batch_id=job.batch_id,
+        jobId=job.job_id,
+        batchId=job.batch_id,
         mode=job.mode,
         recompute=bool(job.recompute),
         status=job.status,
-        requested_by=job.requested_by,
-        created_at=job.created_at,
-        started_at=job.started_at,
-        finished_at=job.finished_at,
-        error_text=job.error_text,
+        requestedBy=job.requested_by,
+        createdAt=job.created_at,
+        startedAt=job.started_at,
+        finishedAt=job.finished_at,
+        errorText=job.error_text,
     )
 
 
@@ -52,9 +52,6 @@ async def create_dp_job(
     background_tasks.add_task(
         DPRunner.run_job,
         job.job_id,
-        batch.batch_id,
-        data.mode,
-        data.recompute,
     )
 
     return _build_dp_job_response(job)
@@ -65,8 +62,8 @@ async def create_dp_job(
     response_model=DPJobResponse,
 )
 async def get_dp_job(
-    job_id: str = Path(),
-    repo: DPJobRepo = ...,
+    job_id: str,
+    repo: DPJobRepo,
 ) -> DPJobResponse:
     """Get DP job status"""
     job = await repo.get_by_id(job_id)

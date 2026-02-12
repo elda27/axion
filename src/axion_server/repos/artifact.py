@@ -93,7 +93,8 @@ class ArtifactRepository:
         result = await self.session.execute(
             delete(Artifact).where(Artifact.artifact_id == artifact_id)
         )
-        return result.rowcount > 0
+        rowcount = getattr(result, "rowcount", 0)
+        return int(rowcount or 0) > 0
 
     def get_payload(self, artifact: Artifact) -> Any:
         """Get artifact payload in appropriate type"""
