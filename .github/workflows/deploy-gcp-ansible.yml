@@ -38,7 +38,6 @@ env:
   GCS_BUCKET: ${{ vars.GCS_BUCKET || 'axion-artifacts' }}
   PYTHON_VERSION: '3.12'
   NODE_VERSION: '22'
-  PNPM_VERSION: '10'
 
 jobs:
   # Build artifacts (only for deploy playbook, skip if using CI artifacts)
@@ -70,8 +69,6 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
 
       - name: Build Backend
         run: |

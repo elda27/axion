@@ -12,7 +12,6 @@ on:
 env:
   PYTHON_VERSION: '3.12'
   NODE_VERSION: '22'
-  PNPM_VERSION: '10'
 
 jobs:
   test:
@@ -76,8 +75,6 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
 
       - name: Install frontend dependencies
         run: |
