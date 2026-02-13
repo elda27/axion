@@ -32,18 +32,22 @@ jobs:
           version: "latest"
 
       - name: Install dependencies
+        working-directory: axion
         run: |
           uv sync --frozen --all-extras
 
       - name: Run linting
+        working-directory: axion
         run: |
           uv run ruff check src/
 
       - name: Run type checking
+        working-directory: axion
         run: |
           uv run ty check src/
 
       - name: Run tests
+        working-directory: axion
         run: |
           uv run pytest tests/ -v --cov=src
 
@@ -77,38 +81,39 @@ jobs:
         uses: pnpm/action-setup@v4
 
       - name: Install frontend dependencies
+        working-directory: axion_ui
         run: |
           pnpm install --frozen-lockfile
 
       - name: Build Backend
         run: |
           mkdir -p dist/backend
-          cp -r src/axion src/axion_server src/axion_alembic dist/backend/
-          cp pyproject.toml uv.lock alembic.ini dist/backend/
+          cp -r axion/src/axion axion/src/axion_server axion/src/axion_alembic dist/backend/
+          cp axion/pyproject.toml axion/uv.lock axion/alembic.ini dist/backend/
           cp -r deploy dist/backend/
           cd dist && tar -czf axion-backend.tar.gz backend/
 
       - name: Build Frontend
-        working-directory: src/axion_ui
+        working-directory: axion_ui
         run: |
           pnpm build
 
       - name: Build Storybook
         if: github.ref == 'refs/heads/main'
-        working-directory: src/axion_ui
+        working-directory: axion_ui
         run: |
           pnpm build-storybook
 
       - name: Package Frontend
         run: |
           mkdir -p dist
-          cd src/axion_ui/dist && tar -czf ../../../dist/axion-frontend.tar.gz .
+          cd axion_ui/dist && tar -czf ../../dist/axion-frontend.tar.gz .
 
       - name: Package Storybook
         if: github.ref == 'refs/heads/develop'
         run: |
           mkdir -p dist
-          cd src/axion_ui/storybook-static && tar -czf ../../../dist/axion-storybook.tar.gz .
+          cd axion_ui/storybook-static && tar -czf ../../dist/axion-storybook.tar.gz .
 
       - name: Upload Backend Artifact
         id: upload-backend
