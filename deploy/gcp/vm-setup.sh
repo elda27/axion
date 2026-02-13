@@ -82,7 +82,7 @@ Type=simple
 User=axion
 WorkingDirectory=/opt/axion
 EnvironmentFile=/opt/axion/.env
-ExecStart=/opt/axion/.venv/bin/uvicorn axion_server.api.app:app --host 127.0.0.1 --port 8000
+ExecStart=/opt/axion/.venv/bin/uvicorn axion_server.apps.api.app:app --host 127.0.0.1 --port 8000
 Restart=always
 RestartSec=10
 

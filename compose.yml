@@ -2,7 +2,7 @@
 services:
   axion-server:
     build:
-      context: .
+      context: ./axion
       dockerfile: axion_server.dockerfile
     container_name: axion-server
     ports:
@@ -20,7 +20,7 @@ services:
 
   axion-frontend:
     build:
-      context: .
+      context: ./axion_ui
       dockerfile: axion_ui.dockerfile
       args:
         - BUILD_MODE=production

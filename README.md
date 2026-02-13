@@ -98,7 +98,7 @@ Storybook は http://localhost:6006 でアクセスできます。
 ### ローカルで起動 (Docker 不要)
 
 ```bash
-cd src/axion_ui
+cd axion_ui
 pnpm install
 pnpm storybook
 ```
@@ -110,10 +110,10 @@ pnpm storybook
 make storybook-build
 
 # または直接
-cd src/axion_ui && pnpm build-storybook
+cd axion_ui && pnpm build-storybook
 ```
 
-ビルド成果物は `src/axion_ui/storybook-static/` に出力されます。
+ビルド成果物は `axion_ui/storybook-static/` に出力されます。
 
 ## API 概要
 
@@ -236,7 +236,7 @@ print(qm)  # mean_case_score, median_case_score, failure_rate など
 ## プロジェクト構造
 
 ```
-src/axion/
+axion/src/axion/
 ├── api/                  # FastAPI ルーター
 │   ├── app.py           # アプリケーションファクトリ
 │   ├── deps.py          # 依存性注入
