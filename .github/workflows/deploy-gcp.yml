@@ -39,7 +39,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-      actions: read
+      actions: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
