@@ -1,33 +1,31 @@
-import {
-  ThemeProvider,
-  createTheme,
-  CssBaseline,
-  Container,
-  Typography,
-  Box,
-} from "@mui/material";
-
-const theme = createTheme({
-  palette: {
-    mode: "light",
-    primary: {
-      main: "#1976d2",
-    },
-  },
-});
+import { ThemeProvider, CssBaseline } from "@mui/material";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import theme from "./theme";
+import Layout from "./components/Layout";
+import OrgsPage from "./pages/OrgsPage";
+import ProjectsPage from "./pages/ProjectsPage";
+import BatchesPage from "./pages/BatchesPage";
+import RunsPage from "./pages/RunsPage";
+import RunDetailPage from "./pages/RunDetailPage";
 
 function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Container maxWidth="lg">
-        <Box sx={{ my: 4 }}>
-          <Typography variant="h3" component="h1" gutterBottom>
-            Axion
-          </Typography>
-          <Typography variant="body1">Data Processing Platform</Typography>
-        </Box>
-      </Container>
+      <BrowserRouter>
+        <Layout>
+          <Routes>
+            <Route path="/" element={<OrgsPage />} />
+            <Route path="/orgs/:orgId/projects" element={<ProjectsPage />} />
+            <Route
+              path="/projects/:projectId/batches"
+              element={<BatchesPage />}
+            />
+            <Route path="/batches/:batchId/runs" element={<RunsPage />} />
+            <Route path="/runs/:runId" element={<RunDetailPage />} />
+          </Routes>
+        </Layout>
+      </BrowserRouter>
     </ThemeProvider>
   );
 }

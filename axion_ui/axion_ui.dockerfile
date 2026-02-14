@@ -5,18 +5,21 @@ WORKDIR /app
 # Install pnpm
 RUN corepack enable && corepack prepare pnpm@10.28.0 --activate
 
-# Copy package files
-COPY package.json pnpm-lock.yaml* ./
+# Copy workspace root package files and lockfile
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY axion_ui/package.json ./axion_ui/
 
 # Install dependencies
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --filter axion_ui
 
 # Copy source code
-COPY . ./
+COPY axion_ui/ ./axion_ui/
 
 # Build argument for production builds
 ARG BUILD_MODE=development
-RUN if [ "$BUILD_MODE" = "production" ]; then pnpm build; fi
+RUN if [ "$BUILD_MODE" = "production" ]; then pnpm --filter axion_ui build; fi
+
+WORKDIR /app/axion_ui
 
 # Expose ports (Vite dev: 5173, Storybook: 6006)
 EXPOSE 5173 6006
