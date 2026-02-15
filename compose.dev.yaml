@@ -50,6 +50,8 @@ services:
       - ./axion_ui:/app/axion_ui
       - /app/node_modules
       - /app/axion_ui/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
     command: ["pnpm", "storybook", "--host", "0.0.0.0"]
 
   axion-frontend:
@@ -63,6 +65,8 @@ services:
       - ./axion_ui:/app/axion_ui
       - /app/node_modules
       - /app/axion_ui/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
     command: ["pnpm", "dev", "--host", "0.0.0.0"]
     depends_on:
       - axion-server

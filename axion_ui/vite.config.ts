@@ -6,6 +6,9 @@ export default defineConfig({
   server: {
     host: "0.0.0.0",
     port: 5173,
+    watch: {
+      usePolling: process.env.CHOKIDAR_USEPOLLING === "true",
+    },
     proxy: {
       "/api": {
         target: "http://axion-server:8000",
