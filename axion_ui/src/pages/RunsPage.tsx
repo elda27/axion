@@ -26,6 +26,7 @@ import {
   listRuns,
   createRun,
   getBatch,
+  getProject,
   triggerDPCompute,
 } from "../api/client";
 import type { RunResponse } from "../types";
@@ -44,6 +45,10 @@ export default function RunsPage() {
   const [dpMessage, setDpMessage] = useState<string | null>(null);
 
   const { data: batch } = useApi(() => getBatch(batchId!), [batchId]);
+  const { data: project } = useApi(
+    () => (batch ? getProject(batch.projectId) : Promise.resolve(null)),
+    [batch?.projectId],
+  );
   const {
     data: summary,
     loading: summaryLoading,
@@ -100,7 +105,15 @@ export default function RunsPage() {
     <Box>
       <Breadcrumbs
         crumbs={[
-          { label: "Organizations", to: "/" },
+          { label: "Organizations", to: "/orgs" },
+          {
+            label: project?.name ? "Projects" : "...",
+            to: project ? `/orgs/${project.orgId}/projects` : undefined,
+          },
+          {
+            label: batch?.name ? "Batches" : "...",
+            to: batch ? `/projects/${batch.projectId}/batches` : undefined,
+          },
           { label: batch?.name ?? "..." },
         ]}
       />

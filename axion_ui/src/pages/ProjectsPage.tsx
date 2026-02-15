@@ -33,7 +33,7 @@ export default function ProjectsPage() {
     <Box>
       <Breadcrumbs
         crumbs={[
-          { label: "Organizations", to: "/" },
+          { label: "Organizations", to: "/orgs" },
           { label: org?.name ?? "..." },
         ]}
       />

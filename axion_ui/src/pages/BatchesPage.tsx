@@ -33,7 +33,7 @@ export default function BatchesPage() {
     <Box>
       <Breadcrumbs
         crumbs={[
-          { label: "Organizations", to: "/" },
+          { label: "Organizations", to: "/orgs" },
           {
             label: project?.orgId ? "Projects" : "...",
             to: project ? `/orgs/${project.orgId}/projects` : undefined,

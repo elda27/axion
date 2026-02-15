@@ -129,7 +129,7 @@ export default function RunDetailPage() {
     <Box>
       <Breadcrumbs
         crumbs={[
-          { label: "Organizations", to: "/" },
+          { label: "Organizations", to: "/orgs" },
           { label: "Runs", to: `/batches/${run.batchId}/runs` },
           { label: run.name },
         ]}

@@ -2,6 +2,7 @@ import { ThemeProvider, CssBaseline } from "@mui/material";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import theme from "./theme";
 import Layout from "./components/Layout";
+import TopPage from "./pages/TopPage";
 import OrgsPage from "./pages/OrgsPage";
 import ProjectsPage from "./pages/ProjectsPage";
 import BatchesPage from "./pages/BatchesPage";
@@ -15,7 +16,8 @@ function App() {
       <BrowserRouter>
         <Layout>
           <Routes>
-            <Route path="/" element={<OrgsPage />} />
+            <Route path="/" element={<TopPage />} />
+            <Route path="/orgs" element={<OrgsPage />} />
             <Route path="/orgs/:orgId/projects" element={<ProjectsPage />} />
             <Route
               path="/projects/:projectId/batches"
