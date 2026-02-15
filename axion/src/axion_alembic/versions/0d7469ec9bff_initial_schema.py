@@ -23,14 +23,14 @@ def upgrade() -> None:
     op.create_table('orgs',
     sa.Column('org_id', sa.String(length=26), nullable=False),
     sa.Column('name', sa.String(length=255), nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.PrimaryKeyConstraint('org_id')
     )
     op.create_table('projects',
     sa.Column('project_id', sa.String(length=26), nullable=False),
     sa.Column('org_id', sa.String(length=26), nullable=False),
     sa.Column('name', sa.String(length=255), nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.ForeignKeyConstraint(['org_id'], ['orgs.org_id'], ),
     sa.PrimaryKeyConstraint('project_id')
     )
@@ -39,7 +39,7 @@ def upgrade() -> None:
     sa.Column('batch_id', sa.String(length=26), nullable=False),
     sa.Column('project_id', sa.String(length=26), nullable=False),
     sa.Column('name', sa.String(length=255), nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.ForeignKeyConstraint(['project_id'], ['projects.project_id'], ),
     sa.PrimaryKeyConstraint('batch_id')
     )
@@ -51,9 +51,9 @@ def upgrade() -> None:
     sa.Column('recompute', sa.Integer(), nullable=False),
     sa.Column('status', sa.String(length=20), nullable=False),
     sa.Column('requested_by', sa.String(length=255), nullable=True),
-    sa.Column('created_at', sa.DateTime(), nullable=False),
-    sa.Column('started_at', sa.DateTime(), nullable=True),
-    sa.Column('finished_at', sa.DateTime(), nullable=True),
+    sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
+    sa.Column('started_at', sa.DateTime(timezone=True), nullable=True),
+    sa.Column('finished_at', sa.DateTime(timezone=True), nullable=True),
     sa.Column('error_text', sa.Text(), nullable=True),
     sa.ForeignKeyConstraint(['batch_id'], ['batches.batch_id'], ),
     sa.PrimaryKeyConstraint('job_id')
@@ -67,8 +67,8 @@ def upgrade() -> None:
     sa.Column('status', sa.String(length=20), nullable=False),
     sa.Column('tags_json', sa.Text(), nullable=False),
     sa.Column('note', sa.Text(), nullable=True),
-    sa.Column('created_at', sa.DateTime(), nullable=False),
-    sa.Column('updated_at', sa.DateTime(), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
+    sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
     sa.ForeignKeyConstraint(['batch_id'], ['batches.batch_id'], ),
     sa.PrimaryKeyConstraint('run_id')
     )
@@ -83,7 +83,7 @@ def upgrade() -> None:
     sa.Column('payload_text', sa.Text(), nullable=True),
     sa.Column('payload_number', sa.Float(), nullable=True),
     sa.Column('meta_json', sa.Text(), nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.ForeignKeyConstraint(['run_id'], ['runs.run_id'], ),
     sa.PrimaryKeyConstraint('artifact_id')
     )
@@ -95,7 +95,7 @@ def upgrade() -> None:
     sa.Column('key', sa.String(length=100), nullable=False),
     sa.Column('value_json', sa.Text(), nullable=False),
     sa.Column('baseline_ref', sa.String(length=26), nullable=True),
-    sa.Column('computed_at', sa.DateTime(), nullable=False),
+    sa.Column('computed_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('version', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['run_id'], ['runs.run_id'], ),
     sa.PrimaryKeyConstraint('ci_id'),
@@ -108,7 +108,7 @@ def upgrade() -> None:
     sa.Column('key', sa.String(length=100), nullable=False),
     sa.Column('value_json', sa.Text(), nullable=False),
     sa.Column('source', sa.String(length=20), nullable=False),
-    sa.Column('computed_at', sa.DateTime(), nullable=False),
+    sa.Column('computed_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('version', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['run_id'], ['runs.run_id'], ),
     sa.PrimaryKeyConstraint('qm_id'),
@@ -121,7 +121,7 @@ def upgrade() -> None:
     sa.Column('batch_id', sa.String(length=26), nullable=False),
     sa.Column('pin_type', sa.String(length=20), nullable=False),
     sa.Column('pinned_by', sa.String(length=255), nullable=True),
-    sa.Column('pinned_at', sa.DateTime(), nullable=False),
+    sa.Column('pinned_at', sa.DateTime(timezone=True), nullable=False),
     sa.ForeignKeyConstraint(['batch_id'], ['batches.batch_id'], ),
     sa.ForeignKeyConstraint(['run_id'], ['runs.run_id'], ),
     sa.PrimaryKeyConstraint('pin_id'),

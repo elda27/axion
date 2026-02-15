@@ -24,7 +24,7 @@ class Org(Base):
 
     org_id: Mapped[str] = mapped_column(String(26), primary_key=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
     # Relationships
     projects: Mapped[list["Project"]] = relationship(
@@ -42,7 +42,7 @@ class Project(Base):
         String(26), ForeignKey("orgs.org_id"), nullable=False
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
     # Relationships
     org: Mapped["Org"] = relationship("Org", back_populates="projects")
@@ -63,7 +63,7 @@ class Batch(Base):
         String(26), ForeignKey("projects.project_id"), nullable=False
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
     # Relationships
     project: Mapped["Project"] = relationship("Project", back_populates="batches")
@@ -92,8 +92,8 @@ class Run(Base):
     )  # active, garbage, archived
     tags_json: Mapped[str] = mapped_column(Text, nullable=False, default="[]")
     note: Mapped[str | None] = mapped_column(Text, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
     # Relationships
     batch: Mapped["Batch"] = relationship("Batch", back_populates="runs")
@@ -132,7 +132,7 @@ class RunPin(Base):
         String(20), nullable=False
     )  # champion, user_selected
     pinned_by: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    pinned_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    pinned_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
     # Relationships
     run: Mapped["Run"] = relationship("Run", back_populates="pins")
@@ -173,7 +173,7 @@ class Artifact(Base):
         Float, nullable=True
     )  # for inline_number
     meta_json: Mapped[str] = mapped_column(Text, nullable=False, default="{}")
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
     # Relationships
     run: Mapped["Run"] = relationship("Run", back_populates="artifacts")
@@ -198,7 +198,7 @@ class QualityMetric(Base):
     source: Mapped[str] = mapped_column(
         String(20), nullable=False
     )  # raw, derived, manual
-    computed_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    computed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
 
     # Relationships
@@ -222,7 +222,7 @@ class ComparisonIndicator(Base):
     key: Mapped[str] = mapped_column(String(100), nullable=False)
     value_json: Mapped[str] = mapped_column(Text, nullable=False)
     baseline_ref: Mapped[str | None] = mapped_column(String(26), nullable=True)
-    computed_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    computed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
 
     # Relationships
@@ -251,9 +251,9 @@ class DPJob(Base):
         String(20), nullable=False, default="queued"
     )  # queued, running, succeeded, failed, canceled
     requested_by: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
-    started_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-    finished_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     error_text: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # Relationships

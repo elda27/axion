@@ -7,66 +7,32 @@ services:
     container_name: axion-server
     ports:
       - "8000:8000"
-    volumes:
-      - ./axion/src/axion:/app/src/axion
-      - ./axion/src/axion_server:/app/src/axion_server
-      - ./axion/pyproject.toml:/app/pyproject.toml:ro
     environment:
-      - DATABASE_URL=postgresql://axion:axion_dev_password@postgres:5432/axion
+      - DATABASE_URL=postgresql+asyncpg://axion:axion_dev_password@postgres:5432/axion
       - S3_ENDPOINT_URL=http://rustfs:9000
       - S3_ACCESS_KEY_ID=rustfsadmin
       - S3_SECRET_ACCESS_KEY=rustfsadmin
-    command: ["uv", "run", "uvicorn", "axion_server.apps.api.app:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     depends_on:
       postgres:
         condition: service_healthy
       rustfs-setup:
         condition: service_completed_successfully
 
-  axion-alembic:
-    build:
-      context: ./axion
-      dockerfile: axion_alembic.dockerfile
-    container_name: axion-alembic
-    volumes:
-      - ./axion/src/axion:/app/src/axion
-      - ./axion/src/axion_server:/app/src/axion_server
-      - ./axion/src/axion_alembic:/app/src/axion_alembic
-      - ./axion/alembic.ini:/app/alembic.ini:ro
-    environment:
-      - DATABASE_URL=postgresql://axion:axion_dev_password@postgres:5432/axion
-    depends_on:
-      postgres:
-        condition: service_healthy
-
-  axion-ui:
-    build:
-      context: .
-      dockerfile: axion_ui/axion_ui.dockerfile
-    container_name: axion-ui
-    ports:
-      - "6006:6006"
-    volumes:
-      - ./axion_ui:/app
-      - /app/node_modules
-    command: ["pnpm", "storybook", "--host", "0.0.0.0"]
-
   axion-frontend:
     build:
       context: .
       dockerfile: axion_ui/axion_ui.dockerfile
+      args:
+        - BUILD_MODE=production
     container_name: axion-frontend
     ports:
       - "5173:5173"
-    volumes:
-      - ./axion_ui:/app
-      - /app/node_modules
-    command: ["pnpm", "dev", "--host", "0.0.0.0"]
+    command: ["pnpm", "preview", "--host", "0.0.0.0", "--port", "5173"]
     depends_on:
       - axion-server
 
   postgres:
-    image: postgres:16-alpine
+    image: postgres:16
     container_name: axion-postgres
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-axion}
