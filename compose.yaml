@@ -38,8 +38,6 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-axion}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-axion_dev_password}
       POSTGRES_DB: ${POSTGRES_DB:-axion}
-    ports:
-      - "${POSTGRES_PORT:-5433}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -55,9 +53,6 @@ services:
       RUSTFS_ACCESS_KEY: ${RUSTFS_ACCESS_KEY:-rustfsadmin}
       RUSTFS_SECRET_KEY: ${RUSTFS_SECRET_KEY:-rustfsadmin}
       RUSTFS_CONSOLE_ENABLE: "true"
-    ports:
-      - "${RUSTFS_API_PORT:-9010}:9000"
-      - "${RUSTFS_CONSOLE_PORT:-9011}:9001"
     volumes:
       - rustfs_data:/data
     healthcheck:

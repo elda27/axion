@@ -5,8 +5,6 @@ services:
       context: ./axion
       dockerfile: axion_server.dockerfile
     container_name: axion-server
-    ports:
-      - "8000:8000"
     volumes:
       - ./axion/src/axion:/app/src/axion
       - ./axion/src/axion_server:/app/src/axion_server
