@@ -1,6 +1,7 @@
 from unittest.mock import patch
 
 import pytest
+
 from axion_lab_server.gateways.storage.factory import get_object_store
 from axion_lab_server.gateways.storage.gcs import GCSObjectStore
 from axion_lab_server.gateways.storage.local import LocalObjectStore

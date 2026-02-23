@@ -3,14 +3,15 @@
 import json
 from typing import Any
 
+from sqlalchemy import and_, delete, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from axion_lab_server.repos.models.entities import (
     AggregationMember,
     ComparisonIndicator,
     Run,
 )
 from axion_lab_server.shared.libs import generate_id, utc_now
-from sqlalchemy import and_, delete, select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class ComparisonIndicatorRepository:

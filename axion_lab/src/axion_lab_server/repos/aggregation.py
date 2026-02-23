@@ -2,11 +2,12 @@
 
 import json
 
+from sqlalchemy import delete, func, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from axion_lab_server.repos.models.entities import Aggregation, AggregationMember
 from axion_lab_server.shared.domain import AggregationCreate, AggregationMemberAdd
 from axion_lab_server.shared.libs import generate_id, utc_now
-from sqlalchemy import delete, func, select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class AggregationRepository:

@@ -2,7 +2,6 @@
 
 from datetime import datetime
 
-from axion_lab_server.repos.models.base import Base
 from sqlalchemy import (
     DateTime,
     Float,
@@ -14,6 +13,8 @@ from sqlalchemy import (
     UniqueConstraint,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from axion_lab_server.repos.models.base import Base
 
 
 class Org(Base):

@@ -1,11 +1,10 @@
-from datetime import UTC, datetime
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock
 
 import pytest
 
 from axion_lab_server.ops.dp.runner import DPRunner, RunScores
-from axion_lab_server.shared.domain import DPJobStatus, QualityMetricSource
+from axion_lab_server.shared.domain import QualityMetricSource
 
 
 def _run(*, run_id: str = "run-1"):
