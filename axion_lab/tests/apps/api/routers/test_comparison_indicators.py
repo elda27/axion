@@ -4,7 +4,6 @@ from typing import Any, cast
 from unittest.mock import AsyncMock, Mock
 
 import pytest
-
 from axion_lab_server.apps.api.routers.comparison_indicators import (
     _build_ci_response,
     list_comparison_indicators_by_batch,

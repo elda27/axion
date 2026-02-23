@@ -4,7 +4,6 @@ from typing import Any, cast
 from unittest.mock import AsyncMock, Mock
 
 import pytest
-
 from axion_lab_server.apps.api.routers.quality_metrics import (
     _build_qm_response,
     list_quality_metrics_by_batch,
