@@ -278,7 +278,6 @@ wheels = [
 
 [[package]]
 name = "axion-lab"
-version = "0.0.1"
 source = { editable = "axion_lab" }
 dependencies = [
     { name = "aioboto3" },

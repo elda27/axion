@@ -8,9 +8,13 @@ Usage:
     uv run python examples/quickstart.py
 """
 
-from __future__ import annotations
+import os
 
 from axion_lab.high_level import create_artifact, create_run
+
+os.environ["AXION_LAB_ORG"] = "exp"
+os.environ["AXION_LAB_PROJECT"] = "test"
+os.environ["AXION_LAB_BATCH"] = "example"
 
 
 def main() -> None:
@@ -45,4 +49,6 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    main()
+    main()
     main()

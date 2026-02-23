@@ -1,7 +1,5 @@
 """Run API router"""
 
-from fastapi import APIRouter, status
-
 from axion_lab_server.apps.api.deps import BatchPath, RunPath, RunRepo
 from axion_lab_server.shared.domain import (
     CursorPaginatedResponse,
@@ -16,6 +14,7 @@ from axion_lab_server.shared.domain.run import (
     RecentCollapsed,
     RunBriefResponse,
 )
+from fastapi import APIRouter, status
 
 router = APIRouter(tags=["Runs"])
 
@@ -88,8 +87,8 @@ async def get_runs_summary(
         exclude_ids.append(champion.run_id)
     exclude_ids.extend([r.run_id for r in user_selected])
 
-    # Get recent 3
-    recent = await repo.get_recent(batch.batch_id, limit=3, exclude_ids=exclude_ids)
+    # Get recent runs
+    recent = await repo.get_recent(batch.batch_id, limit=20, exclude_ids=exclude_ids)
     exclude_ids.extend([r.run_id for r in recent])
 
     # Get others
