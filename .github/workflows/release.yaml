@@ -1,36 +1,41 @@
 name: Publish to PyPI
 
 on:
-  workflow_run:
-    workflows: ["CI"]
-    types: [completed]
-    branches: [main]
+  push:
+    tags:
+      - 'v*'
 
 jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
   build:
-    if: >-
-      github.event.workflow_run.conclusion == 'success' &&
-      startsWith(github.event.workflow_run.head_branch, 'v')
+    needs: ci
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./axion_lab
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+
       - name: Build
-        run: |
-          python -m pip install -U pip build
-          python -m build
+        run: uv build
 
       - uses: actions/upload-artifact@v4
         with:
           name: dist
-          path: dist/*
+          path: axion_lab/dist/*
 
   publish:
     needs: build
