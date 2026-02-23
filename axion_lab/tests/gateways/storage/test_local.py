@@ -1,5 +1,4 @@
 import pytest
-
 from axion_lab_server.gateways.storage.local import LocalObjectStore
 
 
@@ -213,9 +212,7 @@ class TestListKeys:
 
     @pytest.mark.asyncio
     async def test_list_keys_excludes_meta_files(self, store) -> None:
-        await store.put_bytes(
-            "dir/file.txt", b"data", metadata={"key": "val"}
-        )
+        await store.put_bytes("dir/file.txt", b"data", metadata={"key": "val"})
 
         refs = await store.list_keys("dir")
 
