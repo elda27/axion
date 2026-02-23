@@ -1,5 +1,6 @@
 from datetime import UTC, datetime
 from types import SimpleNamespace
+from typing import Any, cast
 from unittest.mock import AsyncMock, Mock
 
 import pytest
@@ -41,7 +42,7 @@ def test_build_artifact_response_parses_payload_and_meta() -> None:
 
 @pytest.mark.asyncio
 async def test_create_artifact_returns_built_response() -> None:
-    run = SimpleNamespace(run_id="run-123")
+    run = cast(Any, SimpleNamespace(run_id="run-123"))
     artifact = _artifact(artifact_id="art-1", run_id="run-123")
     repo = Mock()
     repo.create = AsyncMock(return_value=artifact)
@@ -65,7 +66,7 @@ async def test_create_artifact_returns_built_response() -> None:
 
 @pytest.mark.asyncio
 async def test_list_artifacts_returns_cursor_page() -> None:
-    run = SimpleNamespace(run_id="run-321")
+    run = cast(Any, SimpleNamespace(run_id="run-321"))
     artifacts = [
         _artifact(artifact_id="a1", run_id="run-321"),
         _artifact(artifact_id="a2", run_id="run-321"),

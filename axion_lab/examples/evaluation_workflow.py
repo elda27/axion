@@ -12,12 +12,21 @@ Usage:
 from __future__ import annotations
 
 import time
+from typing import TypedDict
 
 from axion_lab import AxionLabClient
 
+
+class _RunConfig(TypedDict):
+    name: str
+    tags: list[str]
+    note: str
+    scores: dict[str, int | float]
+
+
 # ── シナリオデータ ───────────────────────────────────────────────
 # 3つの異なるモデル/プロンプト設定で要約タスクを評価するシナリオ
-RUN_CONFIGS = [
+RUN_CONFIGS: list[_RunConfig] = [
     {
         "name": "run-gpt4o-prompt-v1",
         "tags": ["gpt-4o", "prompt-v1"],
@@ -86,7 +95,7 @@ def main() -> None:
         print(f"\n  Run: {run.name} ({run.run_id})")
 
         # 各スコアを Artifact として登録
-        scores: dict[str, float] = cfg["scores"]
+        scores: dict[str, int | float] = cfg["scores"]
         for metric_name, score_value in scores.items():
             # evaluation タイプはスコア系、latency/cost は専用タイプ
             if metric_name == "latency_p95_ms":

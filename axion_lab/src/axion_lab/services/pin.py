@@ -14,7 +14,7 @@ class PinService:
 
     def create(self, run_id: str, pin_type: PinType | str) -> PinResponse:
         """Pin a run as champion or user_selected."""
-        body = PinCreate(pin_type=PinType(pin_type))
+        body = PinCreate.model_validate({"pin_type": PinType(pin_type)})
         data = self._http.post(
             f"/runs/{run_id}/pins",
             json=body.model_dump(by_alias=True),

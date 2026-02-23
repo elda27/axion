@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import builtins
 from dataclasses import dataclass
 from types import SimpleNamespace
 
@@ -27,7 +28,7 @@ class _Named:
 
 
 class _FakeOrgService:
-    def __init__(self, items: list[_Named]) -> None:
+    def __init__(self, items: builtins.list[_Named]) -> None:
         self._items = items
 
     def list(self, *, limit: int = 100, cursor: str | None = None):
@@ -40,7 +41,7 @@ class _FakeOrgService:
 
 
 class _FakeProjectService:
-    def __init__(self, items: list[_Named]) -> None:
+    def __init__(self, items: builtins.list[_Named]) -> None:
         self._items = items
 
     def list(self, org_id: str, *, limit: int = 100, cursor: str | None = None):
@@ -53,7 +54,7 @@ class _FakeProjectService:
 
 
 class _FakeBatchService:
-    def __init__(self, items: list[_Named]) -> None:
+    def __init__(self, items: builtins.list[_Named]) -> None:
         self._items = items
 
     def list(self, project_id: str, *, limit: int = 100, cursor: str | None = None):

@@ -1,5 +1,6 @@
 from datetime import UTC, datetime
 from types import SimpleNamespace
+from typing import Any, cast
 from unittest.mock import AsyncMock, Mock
 
 import pytest
@@ -44,7 +45,7 @@ def test_build_qm_response_handles_empty_value() -> None:
 
 @pytest.mark.asyncio
 async def test_list_quality_metrics_by_run_returns_items() -> None:
-    run = SimpleNamespace(run_id="run-123")
+    run = cast(Any, SimpleNamespace(run_id="run-123"))
     repo = Mock()
     repo.list_by_run = AsyncMock(
         return_value=[
@@ -63,7 +64,7 @@ async def test_list_quality_metrics_by_run_returns_items() -> None:
 
 @pytest.mark.asyncio
 async def test_list_quality_metrics_by_batch_returns_cursor_page() -> None:
-    batch = SimpleNamespace(batch_id="batch-123")
+    batch = cast(Any, SimpleNamespace(batch_id="batch-123"))
     repo = Mock()
     repo.list_by_batch = AsyncMock(
         return_value=(
@@ -93,7 +94,7 @@ async def test_list_quality_metrics_by_batch_returns_cursor_page() -> None:
 
 @pytest.mark.asyncio
 async def test_list_quality_metrics_by_batch_has_more_false_without_cursor() -> None:
-    batch = SimpleNamespace(batch_id="batch-xyz")
+    batch = cast(Any, SimpleNamespace(batch_id="batch-xyz"))
     repo = Mock()
     repo.list_by_batch = AsyncMock(return_value=([_metric(qm_id="qm-z")], None))
 

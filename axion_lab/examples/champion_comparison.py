@@ -10,7 +10,16 @@ Usage:
 
 from __future__ import annotations
 
+from typing import TypedDict
+
 from axion_lab import AxionLabClient
+
+
+class _CandidateConfig(TypedDict):
+    name: str
+    tags: list[str]
+    note: str
+    scores: dict[str, float]
 
 
 def main() -> None:
@@ -55,7 +64,7 @@ def main() -> None:
 
     # ── 3. 候補 Run の作成 ────────────────────────────────────
     print("\n=== Create Candidate Runs ===")
-    candidates = [
+    candidates: list[_CandidateConfig] = [
         {
             "name": "candidate-seggpt",
             "tags": ["seggpt", "candidate"],

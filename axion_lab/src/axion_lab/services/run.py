@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import builtins
+
 from axion_lab.schemas import (
     CursorPaginatedResponse,
     RunCreate,
@@ -25,7 +27,7 @@ class RunService:
         name: str,
         *,
         status: RunStatus = RunStatus.ACTIVE,
-        tags: list[str] | None = None,
+        tags: builtins.list[str] | None = None,
         note: str | None = None,
     ) -> RunResponse:
         """Create a new run in a batch."""
@@ -79,7 +81,7 @@ class RunService:
         *,
         name: str | None = None,
         status: RunStatus | str | None = None,
-        tags: list[str] | None = None,
+        tags: builtins.list[str] | None = None,
         note: str | None = None,
     ) -> RunResponse:
         """Update a run (partial update)."""
