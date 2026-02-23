@@ -94,23 +94,28 @@ export type ArtifactKind =
   | "inline_number"
   | "inline_json";
 
-export type ArtifactType =
-  | "langfuse_trace"
-  | "object_storage"
-  | "note"
-  | "dashboard"
-  | "git_commit"
-  | "file"
-  | "evaluation"
-  | "latency_p95_ms"
-  | "cost_usd"
-  | "other";
+/** Well-known artifact types (used as suggestions in the UI). */
+export const ARTIFACT_TYPES = [
+  "langfuse_trace",
+  "object_storage",
+  "note",
+  "dashboard",
+  "git_commit",
+  "file",
+  "evaluation",
+  "latency_p95_ms",
+  "cost_usd",
+  "other",
+] as const;
+
+/** Union of well-known types, but any free-text string is also accepted. */
+export type ArtifactType = (typeof ARTIFACT_TYPES)[number] | (string & {});
 
 export interface ArtifactResponse {
   artifactId: string;
   runId: string;
   kind: ArtifactKind;
-  type: ArtifactType;
+  type: string;
   label: string;
   payload: unknown;
   meta: Record<string, unknown>;
@@ -119,7 +124,7 @@ export interface ArtifactResponse {
 
 export interface ArtifactCreate {
   kind: ArtifactKind;
-  type: ArtifactType;
+  type: string;
   label: string;
   payload: unknown;
   meta?: Record<string, unknown>;

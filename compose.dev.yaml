@@ -50,12 +50,14 @@ services:
       - /app/axion_lab_ui/node_modules
     environment:
       - CHOKIDAR_USEPOLLING=true
-    command: ["pnpm", "storybook", "--host", "0.0.0.0"]
+    command: ["sh", "-c", "cd /app && pnpm install --filter axion_lab_ui && cd /app/axion_lab_ui && exec pnpm storybook --host 0.0.0.0"]
 
   axion-lab-frontend:
     build:
       context: .
       dockerfile: axion_lab_ui/axion_lab_ui.dockerfile
+      args:
+        - BUILD_MODE=development
     container_name: axion-lab-frontend
     ports:
       - "5173:5173"
@@ -65,7 +67,7 @@ services:
       - /app/axion_lab_ui/node_modules
     environment:
       - CHOKIDAR_USEPOLLING=true
-    command: ["pnpm", "dev", "--host", "0.0.0.0"]
+    command: ["sh", "-c", "cd /app && pnpm install --filter axion_lab_ui && cd /app/axion_lab_ui && exec pnpm dev --host 0.0.0.0"]
     depends_on:
       - axion-lab-server
 

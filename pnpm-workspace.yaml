@@ -1,2 +1,5 @@
 packages:
-  - 'axion_lab_ui'
+  - axion_lab_ui
+
+ignoredBuiltDependencies:
+  - esbuild

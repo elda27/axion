@@ -8,7 +8,7 @@ importers:
 
   .: {}
 
-  axion_ui:
+  axion_lab_ui:
     dependencies:
       '@emotion/react':
         specifier: ^11.14.0
