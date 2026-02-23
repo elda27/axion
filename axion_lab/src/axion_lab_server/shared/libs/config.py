@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     database_type: Literal["postgresql", "sqlite"] = "postgresql"
 
     # Object Storage
-    object_store_provider: Literal["s3", "minio", "gcs", "local"] = "minio"
+    object_store_provider: Literal["s3", "minio", "rustfs", "gcs", "local"] = "minio"
     object_store_endpoint: str = "http://localhost:9010"
     object_store_access_key: str = "minioadmin"
     object_store_secret_key: str = "minioadmin"

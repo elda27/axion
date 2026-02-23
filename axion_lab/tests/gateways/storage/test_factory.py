@@ -1,7 +1,6 @@
 from unittest.mock import patch
 
 import pytest
-
 from axion_lab_server.gateways.storage.factory import get_object_store
 from axion_lab_server.gateways.storage.gcs import GCSObjectStore
 from axion_lab_server.gateways.storage.local import LocalObjectStore
@@ -48,8 +47,9 @@ def test_factory_returns_local_store(mock_get_settings) -> None:
     assert isinstance(store, LocalObjectStore)
 
 
+@patch("axion_lab_server.gateways.storage.gcs.storage.Client")
 @patch("axion_lab_server.gateways.storage.factory.get_settings")
-def test_factory_returns_gcs_store(mock_get_settings) -> None:
+def test_factory_returns_gcs_store(mock_get_settings, mock_client) -> None:
     mock_get_settings.return_value = _mock_settings(object_store_provider="gcs")
 
     store = get_object_store()
@@ -57,8 +57,9 @@ def test_factory_returns_gcs_store(mock_get_settings) -> None:
     assert isinstance(store, GCSObjectStore)
 
 
+@patch("boto3.client")
 @patch("axion_lab_server.gateways.storage.factory.get_settings")
-def test_factory_returns_s3_store(mock_get_settings) -> None:
+def test_factory_returns_s3_store(mock_get_settings, mock_boto_client) -> None:
     mock_get_settings.return_value = _mock_settings(object_store_provider="s3")
 
     store = get_object_store()
@@ -66,8 +67,9 @@ def test_factory_returns_s3_store(mock_get_settings) -> None:
     assert isinstance(store, S3ObjectStore)
 
 
+@patch("boto3.client")
 @patch("axion_lab_server.gateways.storage.factory.get_settings")
-def test_factory_returns_s3_for_minio(mock_get_settings) -> None:
+def test_factory_returns_s3_for_minio(mock_get_settings, mock_boto_client) -> None:
     mock_get_settings.return_value = _mock_settings(
         object_store_provider="minio",
         object_store_endpoint="http://localhost:9000",

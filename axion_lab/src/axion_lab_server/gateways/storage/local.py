@@ -34,7 +34,7 @@ class LocalObjectStore(ObjectStore):
 
         # Store metadata in a sidecar file
         if metadata or content_type:
-            meta = metadata or {}
+            meta = dict(metadata) if metadata else {}
             if content_type:
                 meta["_content_type"] = content_type
             meta_path = Path(str(path) + ".meta")

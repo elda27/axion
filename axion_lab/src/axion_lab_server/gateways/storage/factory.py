@@ -26,12 +26,12 @@ def get_object_store() -> ObjectStore:
             credentials_path=settings.gcs_credentials_path,
         )
     else:
-        # S3 or MinIO
+        # S3, MinIO, or RustFS
         return S3ObjectStore(
             bucket=settings.object_store_bucket,
             endpoint_url=(
                 settings.object_store_endpoint
-                if settings.object_store_provider == "minio"
+                if settings.object_store_provider in ("minio", "rustfs")
                 else None
             ),
             access_key=settings.object_store_access_key,
