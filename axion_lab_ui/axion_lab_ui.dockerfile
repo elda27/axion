@@ -18,9 +18,9 @@ COPY axion_lab_ui/ ./axion_lab_ui/
 # Build argument for production builds
 ARG BUILD_MODE=development
 RUN if [ "$BUILD_MODE" = "production" ]; then \
-      pnpm install --frozen-lockfile --filter axion_lab_ui && \
-      pnpm --filter axion_lab_ui build; \
-    fi
+  pnpm install --frozen-lockfile --filter axion_lab_ui && \
+  pnpm --filter axion_lab_ui build; \
+  fi
 
 WORKDIR /app/axion_lab_ui
 
