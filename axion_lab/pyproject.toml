@@ -1,6 +1,6 @@
 [project]
 name = "axion-lab"
-version = "0.0.1"
+dynamic = ["version"]
 description = "Artifact-first Experiment Evaluation System"
 readme = "README.md"
 authors = [{ name = "elda27", email = "kaz.birdstick@gmail.com" }]
@@ -38,8 +38,15 @@ dev = [
 axion-lab = "axion_lab.cli:main"
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "uv-dynamic-versioning"]
 build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "uv-dynamic-versioning"
+
+[tool.uv-dynamic-versioning]
+enable = true
+fallback-version = "0.0.0"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/axion_lab", "src/axion_lab_server"]
