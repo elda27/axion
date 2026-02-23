@@ -1,12 +1,12 @@
 [project]
-name = "axion-ws"
+name = "axion-lab-ws"
 version = "0.1.0"
 requires-python = ">=3.12"
-dependencies = ["axion"]
+dependencies = ["axion-lab"]
 
 [tool.uv.sources]
-axion = { workspace = true }
+axion-lab = { workspace = true }
 
 [tool.uv.workspace]
-members = ["axion/"]
-exclude = ["axion/tests"]
+members = ["axion_lab/"]
+exclude = ["axion_lab/tests"]

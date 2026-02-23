@@ -33,6 +33,25 @@
 | GET    | `/v1/projects/{projectId}/batches?limit=&cursor=` | 一覧 |
 | GET    | `/v1/batches/{batchId}`                           | 詳細 |
 
+### Aggregation（集計グループ）
+
+Batch と並列する概念。Batch 内や Batch 間を超えて、メタデータに基づいて Run を集計するための仕組み。
+主なユースケース:
+- ML 時系列（epoch）× 手法の Loss/metric 比較
+- LLM モデル × agent 実装バージョンを横断した比較
+
+| Method | Endpoint                                                      | 説明                |
+| ------ | ------------------------------------------------------------- | ------------------- |
+| POST   | `/v1/projects/{projectId}/aggregations`                       | 作成                |
+| GET    | `/v1/projects/{projectId}/aggregations?limit=&cursor=`        | 一覧                |
+| GET    | `/v1/aggregations/{aggregationId}`                            | 詳細                |
+| DELETE | `/v1/aggregations/{aggregationId}`                            | 削除                |
+| POST   | `/v1/aggregations/{aggregationId}/members`                    | メンバー（Run）追加 |
+| GET    | `/v1/aggregations/{aggregationId}/members?limit=&cursor=`     | メンバー一覧        |
+| DELETE | `/v1/aggregations/{aggregationId}/members/{runId}`            | メンバー削除        |
+| GET    | `/v1/aggregations/{aggregationId}/quality-metrics?key=`       | 集計内 QM 一覧      |
+| GET    | `/v1/aggregations/{aggregationId}/comparison-indicators?key=` | 集計内 CI 一覧      |
+
 > v0.1では CRUD のうち 作成＋一覧＋詳細があれば十分（削除は後回しでOK）
 
 ---

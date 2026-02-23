@@ -8,8 +8,8 @@ resolution-markers = [
 
 [manifest]
 members = [
-    "axion",
-    "axion-ws",
+    "axion-lab",
+    "axion-lab-ws",
 ]
 
 [[package]]
@@ -277,9 +277,9 @@ wheels = [
 ]
 
 [[package]]
-name = "axion"
-version = "0.1.0"
-source = { editable = "axion" }
+name = "axion-lab"
+version = "0.0.1"
+source = { editable = "axion_lab" }
 dependencies = [
     { name = "aioboto3" },
     { name = "aiosqlite" },
@@ -355,15 +355,15 @@ dev = [
 google = [{ name = "google-cloud-storage", specifier = ">=3.9.0" }]
 
 [[package]]
-name = "axion-ws"
+name = "axion-lab-ws"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
-    { name = "axion" },
+    { name = "axion-lab" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "axion", editable = "axion" }]
+requires-dist = [{ name = "axion-lab", editable = "axion_lab" }]
 
 [[package]]
 name = "boto3"

@@ -1,0 +1,62 @@
+"""Comparison Indicators API router"""
+
+import json
+
+from fastapi import APIRouter
+
+from axion_lab_server.apps.api.deps import BatchPath, CIRepo, RunPath
+from axion_lab_server.shared.domain import (
+    ComparisonIndicatorResponse,
+    CursorPaginatedResponse,
+)
+
+router = APIRouter(tags=["Comparison Indicators"])
+
+
+def _build_ci_response(ci) -> ComparisonIndicatorResponse:
+    """Build comparison indicator response"""
+    value = json.loads(ci.value_json) if ci.value_json else None
+    return ComparisonIndicatorResponse(
+        ciId=ci.ci_id,
+        runId=ci.run_id,
+        key=ci.key,
+        value=value,
+        baselineRef=ci.baseline_ref,
+        computedAt=ci.computed_at,
+        version=ci.version,
+    )
+
+
+@router.get(
+    "/runs/{run_id}/comparison-indicators",
+    response_model=list[ComparisonIndicatorResponse],
+)
+async def list_comparison_indicators_by_run(
+    run: RunPath,
+    repo: CIRepo,
+) -> list[ComparisonIndicatorResponse]:
+    """List comparison indicators for a run"""
+    indicators = await repo.list_by_run(run.run_id)
+    return [_build_ci_response(i) for i in indicators]
+
+
+@router.get(
+    "/batches/{batch_id}/comparison-indicators",
+    response_model=CursorPaginatedResponse[ComparisonIndicatorResponse],
+)
+async def list_comparison_indicators_by_batch(
+    batch: BatchPath,
+    repo: CIRepo,
+    key: str | None = None,
+    limit: int = 100,
+    cursor: str | None = None,
+) -> CursorPaginatedResponse[ComparisonIndicatorResponse]:
+    """List comparison indicators for a batch"""
+    indicators, next_cursor = await repo.list_by_batch(
+        batch.batch_id, key=key, limit=limit, cursor=cursor
+    )
+    return CursorPaginatedResponse(
+        items=[_build_ci_response(i) for i in indicators],
+        next_cursor=next_cursor,
+        has_more=next_cursor is not None,
+    )

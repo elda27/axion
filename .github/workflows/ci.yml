@@ -32,22 +32,22 @@ jobs:
           version: "latest"
 
       - name: Install dependencies
-        working-directory: axion
+        working-directory: axion_lab
         run: |
           uv sync --frozen --all-extras
 
       - name: Run linting
-        working-directory: axion
+        working-directory: axion_lab
         run: |
           uv run ruff check src/
 
       - name: Run type checking
-        working-directory: axion
+        working-directory: axion_lab
         run: |
           uv run ty check src/
 
       - name: Run tests
-        working-directory: axion
+        working-directory: axion_lab
         run: |
           uv run pytest tests/ -v --cov=src
 
@@ -81,54 +81,54 @@ jobs:
         uses: pnpm/action-setup@v4
 
       - name: Install frontend dependencies
-        working-directory: axion_ui
+        working-directory: axion_lab_ui
         run: |
           pnpm install --frozen-lockfile
 
       - name: Build Backend
         run: |
           mkdir -p dist/backend
-          cp -r axion/src/axion axion/src/axion_server axion/src/axion_alembic dist/backend/
-          cp axion/pyproject.toml axion/uv.lock axion/alembic.ini dist/backend/
+          cp -r axion_lab/src/axion_lab axion_lab/src/axion_lab_server axion_lab/src/axion_lab_alembic dist/backend/
+          cp axion_lab/pyproject.toml axion_lab/uv.lock axion_lab/alembic.ini dist/backend/
           cp -r deploy dist/backend/
-          cd dist && tar -czf axion-backend.tar.gz backend/
+          cd dist && tar -czf axion-lab-backend.tar.gz backend/
 
       - name: Build Frontend
-        working-directory: axion_ui
+        working-directory: axion_lab_ui
         run: |
           pnpm build
 
       - name: Build Storybook
         if: github.ref == 'refs/heads/main'
-        working-directory: axion_ui
+        working-directory: axion_lab_ui
         run: |
           pnpm build-storybook
 
       - name: Package Frontend
         run: |
           mkdir -p dist
-          cd axion_ui/dist && tar -czf ../../dist/axion-frontend.tar.gz .
+          cd axion_lab_ui/dist && tar -czf ../../dist/axion-lab-frontend.tar.gz .
 
       - name: Package Storybook
         if: github.ref == 'refs/heads/develop'
         run: |
           mkdir -p dist
-          cd axion_ui/storybook-static && tar -czf ../../dist/axion-storybook.tar.gz .
+          cd axion_lab_ui/storybook-static && tar -czf ../../dist/axion-lab-storybook.tar.gz .
 
       - name: Upload Backend Artifact
         id: upload-backend
         uses: actions/upload-artifact@v4
         with:
-          name: axion-backend
-          path: dist/axion-backend.tar.gz
+          name: axion-lab-backend
+          path: dist/axion-lab-backend.tar.gz
           retention-days: 7
 
       - name: Upload Frontend Artifact
         id: upload-frontend
         uses: actions/upload-artifact@v4
         with:
-          name: axion-frontend
-          path: dist/axion-frontend.tar.gz
+          name: axion-lab-frontend
+          path: dist/axion-lab-frontend.tar.gz
           retention-days: 7
 
       - name: Upload Storybook Artifact
@@ -136,8 +136,8 @@ jobs:
         id: upload-storybook
         uses: actions/upload-artifact@v4
         with:
-          name: axion-storybook
-          path: dist/axion-storybook.tar.gz
+          name: axion-lab-storybook
+          path: dist/axion-lab-storybook.tar.gz
           retention-days: 7
 
   # Trigger deployment workflow on success (main/develop only)

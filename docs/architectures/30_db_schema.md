@@ -45,6 +45,41 @@
 **Index:**
 - `(project_id, created_at DESC)`
 
+### aggregations
+
+| Column               | Type      | Constraints |
+| -------------------- | --------- | ----------- |
+| `aggregation_id`     | TEXT      | PRIMARY KEY |
+| `project_id`         | TEXT      | NOT NULL    |
+| `name`               | TEXT      | NOT NULL    |
+| `description`        | TEXT      |             |
+| `group_by_keys_json` | TEXT      | NOT NULL    |
+| `filter_json`        | TEXT      | NOT NULL    |
+| `created_at`         | TIMESTAMP | NOT NULL    |
+
+> Batch と並列する概念。メタデータに基づいて Batch 内/間の Run を集計するグループ。
+> ML epoch×手法比較や LLM モデル×エージェントバージョン横断比較に利用。
+
+**Index:**
+- `(project_id, created_at DESC)`
+
+### aggregation_members
+
+| Column           | Type      | Constraints |
+| ---------------- | --------- | ----------- |
+| `member_id`      | TEXT      | PRIMARY KEY |
+| `aggregation_id` | TEXT      | NOT NULL    |
+| `run_id`         | TEXT      | NOT NULL    |
+| `metadata_json`  | TEXT      | NOT NULL    |
+| `added_at`       | TIMESTAMP | NOT NULL    |
+
+**Unique:**
+- `(aggregation_id, run_id)`
+
+**Index:**
+- `(aggregation_id, added_at DESC)`
+- `(run_id)`
+
 ### runs
 
 | Column       | Type      | Constraints                                    |
@@ -161,6 +196,9 @@
 erDiagram
     orgs ||--o{ projects : has
     projects ||--o{ batches : has
+    projects ||--o{ aggregations : has
+    aggregations ||--o{ aggregation_members : has
+    aggregation_members }o--|| runs : references
     batches ||--o{ runs : has
     runs ||--o{ artifacts : has
     runs ||--o{ quality_metrics : has

@@ -1,94 +1,94 @@
 
 services:
-  axion-server:
+  axion-lab-server:
     build:
-      context: ./axion
-      dockerfile: axion_server.dockerfile
-    container_name: axion-server
+      context: ./axion_lab
+      dockerfile: axion_lab_server.dockerfile
+    container_name: axion-lab-server
     volumes:
-      - ./axion/src/axion:/app/src/axion
-      - ./axion/src/axion_server:/app/src/axion_server
-      - ./axion/pyproject.toml:/app/pyproject.toml:ro
+      - ./axion_lab/src/axion_lab:/app/src/axion_lab
+      - ./axion_lab/src/axion_lab_server:/app/src/axion_lab_server
+      - ./axion_lab/pyproject.toml:/app/pyproject.toml:ro
     environment:
-      - DATABASE_URL=postgresql+asyncpg://axion:axion_dev_password@postgres:5432/axion
+      - DATABASE_URL=postgresql+asyncpg://axion_lab:axion_lab_dev_password@postgres:5432/axion_lab
       - S3_ENDPOINT_URL=http://rustfs:9000
       - S3_ACCESS_KEY_ID=rustfsadmin
       - S3_SECRET_ACCESS_KEY=rustfsadmin
-    command: ["uv", "run", "uvicorn", "axion_server.apps.api.app:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    command: ["uv", "run", "uvicorn", "axion_lab_server.apps.api.app:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     depends_on:
       postgres:
         condition: service_healthy
       rustfs-setup:
         condition: service_completed_successfully
 
-  axion-alembic:
+  axion-lab-alembic:
     build:
-      context: ./axion
-      dockerfile: axion_alembic.dockerfile
-    container_name: axion-alembic
+      context: ./axion_lab
+      dockerfile: axion_lab_alembic.dockerfile
+    container_name: axion-lab-alembic
     volumes:
-      - ./axion/src/axion:/app/src/axion
-      - ./axion/src/axion_server:/app/src/axion_server
-      - ./axion/src/axion_alembic:/app/src/axion_alembic
-      - ./axion/alembic.ini:/app/alembic.ini:ro
+      - ./axion_lab/src/axion_lab:/app/src/axion_lab
+      - ./axion_lab/src/axion_lab_server:/app/src/axion_lab_server
+      - ./axion_lab/src/axion_lab_alembic:/app/src/axion_lab_alembic
+      - ./axion_lab/alembic.ini:/app/alembic.ini:ro
     environment:
-      - DATABASE_URL=postgresql+asyncpg://axion:axion_dev_password@postgres:5432/axion
+      - DATABASE_URL=postgresql+asyncpg://axion_lab:axion_lab_dev_password@postgres:5432/axion_lab
     depends_on:
       postgres:
         condition: service_healthy
 
-  axion-ui:
+  axion-lab-ui:
     build:
       context: .
-      dockerfile: axion_ui/axion_ui.dockerfile
-    container_name: axion-ui
+      dockerfile: axion_lab_ui/axion_lab_ui.dockerfile
+    container_name: axion-lab-ui
     ports:
       - "6006:6006"
     volumes:
-      - ./axion_ui:/app/axion_ui
+      - ./axion_lab_ui:/app/axion_lab_ui
       - /app/node_modules
-      - /app/axion_ui/node_modules
+      - /app/axion_lab_ui/node_modules
     environment:
       - CHOKIDAR_USEPOLLING=true
     command: ["pnpm", "storybook", "--host", "0.0.0.0"]
 
-  axion-frontend:
+  axion-lab-frontend:
     build:
       context: .
-      dockerfile: axion_ui/axion_ui.dockerfile
-    container_name: axion-frontend
+      dockerfile: axion_lab_ui/axion_lab_ui.dockerfile
+    container_name: axion-lab-frontend
     ports:
       - "5173:5173"
     volumes:
-      - ./axion_ui:/app/axion_ui
+      - ./axion_lab_ui:/app/axion_lab_ui
       - /app/node_modules
-      - /app/axion_ui/node_modules
+      - /app/axion_lab_ui/node_modules
     environment:
       - CHOKIDAR_USEPOLLING=true
     command: ["pnpm", "dev", "--host", "0.0.0.0"]
     depends_on:
-      - axion-server
+      - axion-lab-server
 
   postgres:
     image: postgres:16-alpine
-    container_name: axion-postgres
+    container_name: axion-lab-postgres
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-axion}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-axion_dev_password}
-      POSTGRES_DB: ${POSTGRES_DB:-axion}
+      POSTGRES_USER: ${POSTGRES_USER:-axion_lab}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-axion_lab_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-axion_lab}
     ports:
       - "${POSTGRES_PORT:-5433}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U axion -d axion"]
+      test: ["CMD-SHELL", "pg_isready -U axion_lab -d axion_lab"]
       interval: 5s
       timeout: 5s
       retries: 5
 
   rustfs:
     image: rustfs/rustfs:latest
-    container_name: axion-rustfs
+    container_name: axion-lab-rustfs
     environment:
       RUSTFS_ACCESS_KEY: ${RUSTFS_ACCESS_KEY:-rustfsadmin}
       RUSTFS_SECRET_KEY: ${RUSTFS_SECRET_KEY:-rustfsadmin}
@@ -106,7 +106,7 @@ services:
 
   rustfs-setup:
     image: amazon/aws-cli:latest
-    container_name: axion-rustfs-setup
+    container_name: axion-lab-rustfs-setup
     depends_on:
       rustfs:
         condition: service_healthy
@@ -116,8 +116,8 @@ services:
       AWS_DEFAULT_REGION: us-east-1
     entrypoint: >
       /bin/sh -c "
-        aws --endpoint-url http://rustfs:9000 s3 mb s3://axion-artifacts --region us-east-1 || true;
-        aws --endpoint-url http://rustfs:9000 s3 mb s3://axion-archives --region us-east-1 || true;
+        aws --endpoint-url http://rustfs:9000 s3 mb s3://axion-lab-artifacts --region us-east-1 || true;
+        aws --endpoint-url http://rustfs:9000 s3 mb s3://axion-lab-archives --region us-east-1 || true;
         exit 0;
       "
 

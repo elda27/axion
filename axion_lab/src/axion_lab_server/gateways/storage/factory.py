@@ -1,0 +1,40 @@
+"""Object store factory"""
+
+from functools import lru_cache
+
+from axion_lab_server.gateways.storage.base import ObjectStore
+from axion_lab_server.gateways.storage.gcs import GCSObjectStore
+from axion_lab_server.gateways.storage.local import LocalObjectStore
+from axion_lab_server.gateways.storage.s3 import S3ObjectStore
+from axion_lab_server.shared.libs.config import get_settings
+
+
+@lru_cache
+def get_object_store() -> ObjectStore:
+    """Get object store instance based on configuration"""
+    settings = get_settings()
+
+    if settings.object_store_provider == "local":
+        return LocalObjectStore(
+            base_path=settings.object_store_local_path,
+            bucket=settings.object_store_bucket,
+        )
+    elif settings.object_store_provider == "gcs":
+        return GCSObjectStore(
+            bucket=settings.object_store_bucket,
+            project_id=settings.gcs_project_id,
+            credentials_path=settings.gcs_credentials_path,
+        )
+    else:
+        # S3 or MinIO
+        return S3ObjectStore(
+            bucket=settings.object_store_bucket,
+            endpoint_url=(
+                settings.object_store_endpoint
+                if settings.object_store_provider == "minio"
+                else None
+            ),
+            access_key=settings.object_store_access_key,
+            secret_key=settings.object_store_secret_key,
+            region=settings.object_store_region,
+        )

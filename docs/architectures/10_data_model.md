@@ -22,6 +22,24 @@ classDiagram
     +created_at
   }
 
+  class Aggregation {
+    +aggregation_id
+    +project_id
+    +name
+    +description
+    +group_by_keys_json
+    +filter_json
+    +created_at
+  }
+
+  class AggregationMember {
+    +member_id
+    +aggregation_id
+    +run_id
+    +metadata_json
+    +added_at
+  }
+
   class Run {
     +run_id
     +batch_id
@@ -72,6 +90,9 @@ classDiagram
 
   Org "1" --> "many" Project
   Project "1" --> "many" Batch
+  Project "1" --> "many" Aggregation
+  Aggregation "1" --> "many" AggregationMember
+  AggregationMember "many" --> "1" Run
   Batch "1" --> "many" Run
   Run "1" --> "many" Artifact
   Run "1" --> "many" QualityMetric

@@ -1,5 +1,5 @@
 # Deveopnment for Agent
-This document provides instructions for setting up a development environment for the Agent component of the Axion project. The Agent is responsible for executing tasks and communicating with the Axion server.
+This document provides instructions for setting up a development environment for the Agent component of the Axion Lab project. The Agent is responsible for executing tasks and communicating with the axion-lab server.
 
 ## Running for development
 You can start the development environment using Docker Compose. The `compose.dev.yaml` file includes additional services and configurations for development purposes.
@@ -10,8 +10,8 @@ docker compose -f compose.yaml -f compose.dev.yaml up -d
 
 | App          | Port |
 | ------------ | ---- |
-| Axion Server | 8000 |
-| Axion UI     | 5173 |
+| axion-lab server | 8000 |
+| Axion Lab UI     | 5173 |
 
 ## Debugging UI
 ### Overview
@@ -24,11 +24,11 @@ This is very useful for debugging the UI or server logic because you can see the
 
 ### Develop ui logic
 A recommendation to develop UI logic is to use the sperate codes with React codes because the logic code should separate with the UI code.
-You can create a folder named `logic` in the `axion_ui` folder and write the logic code in it. Then you can import the logic code in the React components and use it.
+You can create a folder named `logic` in the `axion_lab_ui` folder and write the logic code in it. Then you can import the logic code in the React components and use it.
 But `logic/` should includes only logic code and it refers DDD (Domain-Driven Design) and each folder has single feature or domain.
 
 ### Develop API clients
-You should facade API clients to interact with the Axion server.
+You should facade API clients to interact with the axion-lab server.
 It is recommended to use openapi-generator to generate API services code and use it in the client code.
-You can find the OpenAPI specification for the Axion server in the `openapi.json` in axion server like `http://localhost:8000/openapi.json`.
+You can find the OpenAPI specification for the axion-lab server in the `openapi.json` in axion-lab server like `http://localhost:8000/openapi.json`.
 
