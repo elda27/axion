@@ -244,7 +244,7 @@ export default function RunsPage() {
             </Box>
           )}
 
-          {/* ── Recent (collapsed) ── */}
+          {/* ── Recent ── */}
           {recentRuns.length > 0 && (
             <Box>
               <Box
@@ -253,39 +253,64 @@ export default function RunsPage() {
                   alignItems: "center",
                   gap: 1,
                   mb: 1,
-                  cursor: "pointer",
+                  ...(recentRuns.length > 5 && { cursor: "pointer" }),
                 }}
-                onClick={() => setRecentOpen(!recentOpen)}
+                onClick={
+                  recentRuns.length > 5
+                    ? () => setRecentOpen(!recentOpen)
+                    : undefined
+                }
               >
                 <Typography variant="h6" color="text.secondary">
                   Recent ({recentRuns.length})
                 </Typography>
-                <IconButton size="small">
-                  {recentOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                </IconButton>
+                {recentRuns.length > 5 && (
+                  <IconButton size="small">
+                    {recentOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                  </IconButton>
+                )}
               </Box>
-              <Collapse in={recentOpen}>
-                <Stack spacing={1}>
-                  {recentRuns.map((run) => (
-                    <RunCard
-                      key={run.runId}
-                      run={run}
-                      compact
-                      onClick={() => navigate(`/runs/${run.runId}`)}
-                    />
-                  ))}
-                </Stack>
-              </Collapse>
-              {!recentOpen && (
-                <Paper
-                  variant="outlined"
-                  sx={{ p: 1.5, cursor: "pointer", textAlign: "center" }}
-                  onClick={() => setRecentOpen(true)}
-                >
-                  <Typography variant="body2" color="text.secondary">
-                    Click to expand {recentRuns.length} recent runs
-                  </Typography>
-                </Paper>
+              <Stack spacing={1}>
+                {recentRuns.slice(0, 5).map((run) => (
+                  <RunCard
+                    key={run.runId}
+                    run={run}
+                    compact
+                    onClick={() => navigate(`/runs/${run.runId}`)}
+                  />
+                ))}
+              </Stack>
+              {recentRuns.length > 5 && (
+                <>
+                  <Collapse in={recentOpen}>
+                    <Stack spacing={1} sx={{ mt: 1 }}>
+                      {recentRuns.slice(5).map((run) => (
+                        <RunCard
+                          key={run.runId}
+                          run={run}
+                          compact
+                          onClick={() => navigate(`/runs/${run.runId}`)}
+                        />
+                      ))}
+                    </Stack>
+                  </Collapse>
+                  {!recentOpen && (
+                    <Paper
+                      variant="outlined"
+                      sx={{
+                        p: 1.5,
+                        mt: 1,
+                        cursor: "pointer",
+                        textAlign: "center",
+                      }}
+                      onClick={() => setRecentOpen(true)}
+                    >
+                      <Typography variant="body2" color="text.secondary">
+                        Click to expand {recentRuns.length - 5} more recent runs
+                      </Typography>
+                    </Paper>
+                  )}
+                </>
               )}
             </Box>
           )}
