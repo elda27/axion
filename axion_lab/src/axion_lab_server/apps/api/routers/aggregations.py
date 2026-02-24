@@ -12,6 +12,10 @@ from axion_lab_server.apps.api.deps import (
     ProjectPath,
     RMRepo,
 )
+from axion_lab_server.apps.api.routers.run_metrics import (
+    _build_rm_response,
+    _get_evaluation_types_by_run,
+)
 from axion_lab_server.shared.domain import (
     AggregationCreate,
     AggregationMemberAdd,
@@ -171,12 +175,6 @@ async def remove_member(
 
 
 # ── Metrics across aggregation members ────────────────────────
-
-
-from axion_lab_server.apps.api.routers.run_metrics import (
-    _build_rm_response,
-    _get_evaluation_types_by_run,
-)
 
 
 def _build_ci_response(ci) -> ComparisonIndicatorResponse:
