@@ -1,6 +1,6 @@
 """Batch repository"""
 
-from sqlalchemy import select
+from sqlalchemy import and_, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from axion_lab_server.repos.models.entities import Batch
@@ -33,6 +33,15 @@ class BatchRepository:
         )
         return result.scalar_one_or_none()
 
+    async def get_by_name(self, project_id: str, name: str) -> Batch | None:
+        """Get batch by name within a project"""
+        result = await self.session.execute(
+            select(Batch).where(
+                and_(Batch.project_id == project_id, Batch.name == name)
+            )
+        )
+        return result.scalar_one_or_none()
+
     async def list_by_project(
         self, project_id: str, limit: int = 20, cursor: str | None = None
     ) -> tuple[list[Batch], str | None]:
@@ -40,13 +49,21 @@ class BatchRepository:
         query = (
             select(Batch)
             .where(Batch.project_id == project_id)
-            .order_by(Batch.created_at.desc())
+            .order_by(Batch.created_at.desc(), Batch.batch_id.desc())
         )
 
         if cursor:
             cursor_batch = await self.get_by_id(cursor)
             if cursor_batch:
-                query = query.where(Batch.created_at < cursor_batch.created_at)
+                query = query.where(
+                    or_(
+                        Batch.created_at < cursor_batch.created_at,
+                        and_(
+                            Batch.created_at == cursor_batch.created_at,
+                            Batch.batch_id < cursor_batch.batch_id,
+                        ),
+                    )
+                )
 
         query = query.limit(limit + 1)
         result = await self.session.execute(query)

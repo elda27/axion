@@ -1,6 +1,6 @@
 """Batch API router"""
 
-from fastapi import APIRouter, status
+from fastapi import APIRouter, HTTPException, status
 
 from axion_lab_server.apps.api.deps import BatchPath, BatchRepo, ProjectPath
 from axion_lab_server.shared.domain import (
@@ -23,6 +23,12 @@ async def create_batch(
     repo: BatchRepo,
 ) -> BatchResponse:
     """Create a new batch in a project"""
+    existing = await repo.get_by_name(project.project_id, data.name)
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Batch with name '{data.name}' already exists in this project",
+        )
     batch = await repo.create(project.project_id, data)
     return BatchResponse.model_validate(batch)
 

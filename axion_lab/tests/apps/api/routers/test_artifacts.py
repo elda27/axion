@@ -4,6 +4,8 @@ from typing import Any, cast
 from unittest.mock import AsyncMock, Mock
 
 import pytest
+from fastapi import HTTPException
+
 from axion_lab_server.apps.api.routers.artifacts import (
     _build_artifact_response,
     create_artifact,
@@ -11,7 +13,6 @@ from axion_lab_server.apps.api.routers.artifacts import (
     list_artifacts,
 )
 from axion_lab_server.shared.domain import ArtifactCreate, ArtifactKind
-from fastapi import HTTPException
 
 
 def _artifact(*, artifact_id: str = "a1", run_id: str = "r1", meta_json: str = ""):

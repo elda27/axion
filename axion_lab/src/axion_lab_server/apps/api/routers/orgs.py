@@ -1,9 +1,13 @@
 """Organization API router"""
 
-from fastapi import APIRouter, status
+from fastapi import APIRouter, HTTPException, status
 
 from axion_lab_server.apps.api.deps import OrgPath, OrgRepo
-from axion_lab_server.shared.domain import CursorPaginatedResponse, OrgCreate, OrgResponse
+from axion_lab_server.shared.domain import (
+    CursorPaginatedResponse,
+    OrgCreate,
+    OrgResponse,
+)
 
 router = APIRouter(prefix="/orgs", tags=["Organizations"])
 
@@ -11,6 +15,12 @@ router = APIRouter(prefix="/orgs", tags=["Organizations"])
 @router.post("", response_model=OrgResponse, status_code=status.HTTP_201_CREATED)
 async def create_org(data: OrgCreate, repo: OrgRepo) -> OrgResponse:
     """Create a new organization"""
+    existing = await repo.get_by_name(data.name)
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Organization with name '{data.name}' already exists",
+        )
     org = await repo.create(data)
     return OrgResponse.model_validate(org)
 

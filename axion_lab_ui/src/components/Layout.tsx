@@ -6,8 +6,10 @@ import {
   Box,
   Container,
   IconButton,
+  Button,
 } from "@mui/material";
 import ScienceIcon from "@mui/icons-material/Science";
+import BusinessIcon from "@mui/icons-material/Business";
 import { useNavigate } from "react-router-dom";
 
 interface LayoutProps {
@@ -47,6 +49,15 @@ export default function Layout({ children }: LayoutProps) {
           <Typography variant="body2" sx={{ ml: 1.5, opacity: 0.7, mt: 0.3 }}>
             Experiment Evaluation
           </Typography>
+          <Box sx={{ flexGrow: 1 }} />
+          <Button
+            color="inherit"
+            startIcon={<BusinessIcon />}
+            onClick={() => navigate("/orgs")}
+            sx={{ textTransform: "none" }}
+          >
+            Organizations
+          </Button>
         </Toolbar>
       </AppBar>
       <Container maxWidth="lg" sx={{ flex: 1, py: 3 }}>

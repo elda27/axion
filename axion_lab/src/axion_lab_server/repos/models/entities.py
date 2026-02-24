@@ -2,7 +2,6 @@
 
 from datetime import datetime
 
-from axion_lab_server.repos.models.base import Base
 from sqlalchemy import (
     DateTime,
     Float,
@@ -15,6 +14,8 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from axion_lab_server.repos.models.base import Base
+
 
 class Org(Base):
     """Organization entity"""
@@ -22,7 +23,7 @@ class Org(Base):
     __tablename__ = "orgs"
 
     org_id: Mapped[str] = mapped_column(String(26), primary_key=True)
-    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    name: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False
     )
@@ -56,7 +57,10 @@ class Project(Base):
         "Aggregation", back_populates="project", cascade="all, delete-orphan"
     )
 
-    __table_args__ = (Index("ix_projects_org_created", "org_id", "created_at"),)
+    __table_args__ = (
+        Index("ix_projects_org_created", "org_id", "created_at"),
+        UniqueConstraint("org_id", "name", name="uq_projects_org_name"),
+    )
 
 
 class Batch(Base):
@@ -82,7 +86,10 @@ class Batch(Base):
         "DPJob", back_populates="batch", cascade="all, delete-orphan"
     )
 
-    __table_args__ = (Index("ix_batches_project_created", "project_id", "created_at"),)
+    __table_args__ = (
+        Index("ix_batches_project_created", "project_id", "created_at"),
+        UniqueConstraint("project_id", "name", name="uq_batches_project_name"),
+    )
 
 
 class Run(Base):

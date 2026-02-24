@@ -4,10 +4,11 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from typing import Any, cast
 
-from axion_lab_server.shared.kernel import close_db
-from axion_lab_server.shared.libs.config import get_settings
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+from axion_lab_server.shared.kernel import close_db
+from axion_lab_server.shared.libs.config import get_settings
 
 
 @asynccontextmanager

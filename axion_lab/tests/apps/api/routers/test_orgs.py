@@ -3,6 +3,7 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock
 
 import pytest
+from fastapi import HTTPException
 
 from axion_lab_server.apps.api.routers.orgs import create_org, get_org, list_orgs
 from axion_lab_server.shared.domain import OrgCreate
@@ -20,14 +21,30 @@ def _org(*, org_id: str = "org-1", name: str = "Acme Corp"):
 async def test_create_org_returns_response() -> None:
     repo = Mock()
     org = _org()
+    repo.get_by_name = AsyncMock(return_value=None)
     repo.create = AsyncMock(return_value=org)
 
     data = OrgCreate(name="Acme Corp")
     response = await create_org(data=data, repo=repo)
 
+    repo.get_by_name.assert_awaited_once_with("Acme Corp")
     repo.create.assert_awaited_once_with(data)
     assert response.org_id == "org-1"
     assert response.name == "Acme Corp"
+
+
+@pytest.mark.asyncio
+async def test_create_org_raises_409_when_name_exists() -> None:
+    repo = Mock()
+    repo.get_by_name = AsyncMock(return_value=_org())
+
+    data = OrgCreate(name="Acme Corp")
+
+    with pytest.raises(HTTPException) as exc_info:
+        await create_org(data=data, repo=repo)
+
+    assert exc_info.value.status_code == 409
+    assert "already exists" in exc_info.value.detail
 
 
 @pytest.mark.asyncio

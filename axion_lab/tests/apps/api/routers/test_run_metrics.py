@@ -4,6 +4,7 @@ from typing import Any, cast
 from unittest.mock import AsyncMock, Mock
 
 import pytest
+
 from axion_lab_server.apps.api.routers.run_metrics import (
     _build_rm_response,
     list_run_metrics_by_batch,

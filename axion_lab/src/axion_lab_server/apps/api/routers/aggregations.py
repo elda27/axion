@@ -2,6 +2,8 @@
 
 import json
 
+from fastapi import APIRouter, status
+
 from axion_lab_server.apps.api.deps import (
     AggregationPath,
     AggregationRepo,
@@ -19,7 +21,6 @@ from axion_lab_server.shared.domain import (
     CursorPaginatedResponse,
     RunMetricResponse,
 )
-from fastapi import APIRouter, status
 
 router = APIRouter(tags=["Aggregations"])
 

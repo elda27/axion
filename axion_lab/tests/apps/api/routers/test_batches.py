@@ -3,6 +3,7 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock
 
 import pytest
+from fastapi import HTTPException
 
 from axion_lab_server.apps.api.routers.batches import (
     create_batch,
@@ -32,15 +33,32 @@ async def test_create_batch_returns_response() -> None:
     project = _project()
     repo = Mock()
     batch = _batch()
+    repo.get_by_name = AsyncMock(return_value=None)
     repo.create = AsyncMock(return_value=batch)
 
     data = BatchCreate(name="Batch A")
     response = await create_batch(data=data, project=project, repo=repo)
 
+    repo.get_by_name.assert_awaited_once_with("proj-1", "Batch A")
     repo.create.assert_awaited_once_with("proj-1", data)
     assert response.batch_id == "batch-1"
     assert response.project_id == "proj-1"
     assert response.name == "Batch A"
+
+
+@pytest.mark.asyncio
+async def test_create_batch_raises_409_when_name_exists() -> None:
+    project = _project()
+    repo = Mock()
+    repo.get_by_name = AsyncMock(return_value=_batch())
+
+    data = BatchCreate(name="Batch A")
+
+    with pytest.raises(HTTPException) as exc_info:
+        await create_batch(data=data, project=project, repo=repo)
+
+    assert exc_info.value.status_code == 409
+    assert "already exists" in exc_info.value.detail
 
 
 @pytest.mark.asyncio

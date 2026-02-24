@@ -90,14 +90,15 @@ export default function TopPage() {
         );
         if (cancelled) return;
 
-        const allProjects: ProjectWithContext[] = projectResults.flatMap(
+        const allProjectsRaw: ProjectWithContext[] = projectResults.flatMap(
           (res, i) =>
             res.items.map((p) => ({
               ...p,
               orgName: orgList[i].name,
             })),
         );
-        // Sort by createdAt desc to get most recent
+        // Deduplicate by projectId and sort by createdAt desc
+        const allProjects = dedup(allProjectsRaw, (p) => p.projectId);
         allProjects.sort(
           (a, b) =>
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
@@ -120,7 +121,7 @@ export default function TopPage() {
         if (cancelled) return;
 
         const projectMap = new Map(recentProjects.map((p) => [p.projectId, p]));
-        const allBatches: BatchWithContext[] = batchResults.flatMap(
+        const allBatchesRaw: BatchWithContext[] = batchResults.flatMap(
           (res, i) => {
             const proj = recentProjects[i];
             return res.items.map((b) => ({
@@ -130,6 +131,7 @@ export default function TopPage() {
             }));
           },
         );
+        const allBatches = dedup(allBatchesRaw, (b) => b.batchId);
         allBatches.sort(
           (a, b) =>
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
@@ -148,7 +150,7 @@ export default function TopPage() {
         );
         if (cancelled) return;
 
-        const allRuns: RunWithContext[] = runResults.flatMap((res, i) => {
+        const allRunsRaw: RunWithContext[] = runResults.flatMap((res, i) => {
           const batch = recentBatches[i];
           const proj = projectMap.get(batch.projectId);
           return res.items.map((r) => ({
@@ -158,6 +160,7 @@ export default function TopPage() {
             orgName: proj?.orgName ?? batch.orgName,
           }));
         });
+        const allRuns = dedup(allRunsRaw, (r) => r.runId);
         allRuns.sort(
           (a, b) =>
             new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
@@ -517,4 +520,15 @@ function formatRelative(iso: string): string {
   const days = Math.floor(hours / 24);
   if (days < 30) return `${days}d ago`;
   return new Date(iso).toLocaleDateString();
+}
+
+/** Deduplicate an array by a key function, keeping the first occurrence. */
+function dedup<T>(items: T[], keyFn: (item: T) => string): T[] {
+  const seen = new Set<string>();
+  return items.filter((item) => {
+    const key = keyFn(item);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }

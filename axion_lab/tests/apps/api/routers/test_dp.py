@@ -3,13 +3,14 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock
 
 import pytest
+from fastapi import HTTPException
+
 from axion_lab_server.apps.api.routers.dp import (
     _build_dp_job_response,
     create_dp_job,
     get_dp_job,
 )
 from axion_lab_server.shared.domain import DPJobCreate, DPJobMode, DPJobStatus
-from fastapi import HTTPException
 
 
 def _batch(*, batch_id: str = "batch-1"):

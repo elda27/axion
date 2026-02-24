@@ -3,6 +3,7 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock
 
 import pytest
+from fastapi import HTTPException
 
 from axion_lab_server.apps.api.routers.projects import (
     create_project,
@@ -32,15 +33,32 @@ async def test_create_project_returns_response() -> None:
     org = _org()
     repo = Mock()
     project = _project()
+    repo.get_by_name = AsyncMock(return_value=None)
     repo.create = AsyncMock(return_value=project)
 
     data = ProjectCreate(name="My Project")
     response = await create_project(data=data, org=org, repo=repo)
 
+    repo.get_by_name.assert_awaited_once_with("org-1", "My Project")
     repo.create.assert_awaited_once_with("org-1", data)
     assert response.project_id == "proj-1"
     assert response.org_id == "org-1"
     assert response.name == "My Project"
+
+
+@pytest.mark.asyncio
+async def test_create_project_raises_409_when_name_exists() -> None:
+    org = _org()
+    repo = Mock()
+    repo.get_by_name = AsyncMock(return_value=_project())
+
+    data = ProjectCreate(name="My Project")
+
+    with pytest.raises(HTTPException) as exc_info:
+        await create_project(data=data, org=org, repo=repo)
+
+    assert exc_info.value.status_code == 409
+    assert "already exists" in exc_info.value.detail
 
 
 @pytest.mark.asyncio

@@ -2,12 +2,13 @@
 
 import json
 
-from axion_lab_server.apps.api.deps import ArtifactRepo, BatchPath, RMRepo, RunPath
-from axion_lab_server.repos.models.entities import Artifact
-from axion_lab_server.shared.domain import CursorPaginatedResponse, RunMetricResponse
 from fastapi import APIRouter
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from axion_lab_server.apps.api.deps import ArtifactRepo, BatchPath, RMRepo, RunPath
+from axion_lab_server.repos.models.entities import Artifact
+from axion_lab_server.shared.domain import CursorPaginatedResponse, RunMetricResponse
 
 router = APIRouter(tags=["Run Metrics"])
 

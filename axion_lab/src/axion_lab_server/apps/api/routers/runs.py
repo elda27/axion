@@ -1,5 +1,7 @@
 """Run API router"""
 
+from fastapi import APIRouter, status
+
 from axion_lab_server.apps.api.deps import BatchPath, RunPath, RunRepo
 from axion_lab_server.shared.domain import (
     CursorPaginatedResponse,
@@ -14,7 +16,6 @@ from axion_lab_server.shared.domain.run import (
     RecentCollapsed,
     RunBriefResponse,
 )
-from fastapi import APIRouter, status
 
 router = APIRouter(tags=["Runs"])
 

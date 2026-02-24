@@ -2,7 +2,7 @@
 
 import json
 
-from sqlalchemy import and_, select
+from sqlalchemy import and_, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -92,12 +92,20 @@ class RunRepository:
         if q:
             query = query.where(Run.name.ilike(f"%{q}%"))
 
-        query = query.order_by(Run.created_at.desc())
+        query = query.order_by(Run.created_at.desc(), Run.run_id.desc())
 
         if cursor:
             cursor_run = await self.get_by_id(cursor)
             if cursor_run:
-                query = query.where(Run.created_at < cursor_run.created_at)
+                query = query.where(
+                    or_(
+                        Run.created_at < cursor_run.created_at,
+                        and_(
+                            Run.created_at == cursor_run.created_at,
+                            Run.run_id < cursor_run.run_id,
+                        ),
+                    )
+                )
 
         query = query.limit(limit + 1)
         result = await self.session.execute(query)

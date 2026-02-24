@@ -1,6 +1,6 @@
 """Project repository"""
 
-from sqlalchemy import select
+from sqlalchemy import and_, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from axion_lab_server.repos.models.entities import Project
@@ -33,6 +33,13 @@ class ProjectRepository:
         )
         return result.scalar_one_or_none()
 
+    async def get_by_name(self, org_id: str, name: str) -> Project | None:
+        """Get project by name within an organization"""
+        result = await self.session.execute(
+            select(Project).where(and_(Project.org_id == org_id, Project.name == name))
+        )
+        return result.scalar_one_or_none()
+
     async def list_by_org(
         self, org_id: str, limit: int = 20, cursor: str | None = None
     ) -> tuple[list[Project], str | None]:
@@ -40,13 +47,21 @@ class ProjectRepository:
         query = (
             select(Project)
             .where(Project.org_id == org_id)
-            .order_by(Project.created_at.desc())
+            .order_by(Project.created_at.desc(), Project.project_id.desc())
         )
 
         if cursor:
             cursor_project = await self.get_by_id(cursor)
             if cursor_project:
-                query = query.where(Project.created_at < cursor_project.created_at)
+                query = query.where(
+                    or_(
+                        Project.created_at < cursor_project.created_at,
+                        and_(
+                            Project.created_at == cursor_project.created_at,
+                            Project.project_id < cursor_project.project_id,
+                        ),
+                    )
+                )
 
         query = query.limit(limit + 1)
         result = await self.session.execute(query)

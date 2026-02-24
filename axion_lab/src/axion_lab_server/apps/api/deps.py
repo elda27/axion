@@ -3,6 +3,9 @@
 from collections.abc import AsyncGenerator
 from typing import Annotated
 
+from fastapi import Depends, HTTPException, Path, status
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from axion_lab_server.repos import (
     AggregationRepository,
     ArtifactRepository,
@@ -17,8 +20,6 @@ from axion_lab_server.repos import (
 )
 from axion_lab_server.repos.models.entities import Aggregation, Batch, Org, Project, Run
 from axion_lab_server.shared.kernel import get_db
-from fastapi import Depends, HTTPException, Path, status
-from sqlalchemy.ext.asyncio import AsyncSession
 
 # Database session dependency
 DBSession = Annotated[AsyncSession, Depends(get_db)]
