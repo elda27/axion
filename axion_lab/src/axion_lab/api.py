@@ -23,6 +23,7 @@ _active_run_id: str | None = None
 # Series state  — auto-incrementing step counter per (run_id, tag)
 # ---------------------------------------------------------------------------
 
+
 class _SeriesState:
     """Thread-safe, per-(run, tag) step counter for time-series logging."""
 
@@ -220,7 +221,22 @@ def append_series(
         meta=merged_meta,
         run_id=resolved_run_id,
         client=client,
-    )() -> str | None:
+    )
+
+
+def reset_series(run_id: str | None = None) -> None:
+    """Reset series step counters.
+
+    Parameters
+    ----------
+    run_id:
+        When given, only counters for that run are cleared.
+        When *None*, **all** counters are dropped.
+    """
+    _series_state.reset(run_id)
+
+
+def get_active_run_id() -> str | None:
     """Return the current active run ID."""
     return _active_run_id
 
