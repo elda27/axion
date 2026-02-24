@@ -32,7 +32,7 @@ import { useApi } from "../hooks/useApi";
 import {
   getRun,
   updateRun,
-  getRunQualityMetrics,
+  getRunMetrics,
   getRunComparisonIndicators,
   listArtifacts,
   createArtifact,
@@ -41,7 +41,7 @@ import {
   deletePin,
 } from "../api/client";
 import RunStatusChip from "../components/RunStatusChip";
-import QualityMetricsTable from "../components/QualityMetricsTable";
+import RunMetricsTable from "../components/RunMetricsTable";
 import ComparisonIndicatorsTable from "../components/ComparisonIndicatorsTable";
 import ArtifactList from "../components/ArtifactList";
 import ArtifactCreateDialog from "../components/ArtifactCreateDialog";
@@ -74,7 +74,7 @@ export default function RunDetailPage() {
     data: metrics,
     loading: metricsLoading,
     refetch: refetchMetrics,
-  } = useApi(() => getRunQualityMetrics(runId!), [runId]);
+  } = useApi(() => getRunMetrics(runId!), [runId]);
 
   const { data: indicators, loading: indicatorsLoading } = useApi(
     () => getRunComparisonIndicators(runId!),
@@ -342,15 +342,15 @@ export default function RunDetailPage() {
       {/* ── Tab: Insight ── */}
       {tab === 0 && (
         <Stack spacing={3}>
-          {/* Quality Metrics (primary) */}
+          {/* Run Metrics (primary) */}
           <Box>
             <Typography variant="h5" sx={{ mb: 2 }}>
-              Quality Metrics
+              Run Metrics
             </Typography>
             {metricsLoading ? (
               <Loading message="Loading metrics..." />
             ) : (
-              <QualityMetricsTable metrics={metrics ?? []} />
+              <RunMetricsTable metrics={metrics ?? []} />
             )}
           </Box>
 

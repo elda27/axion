@@ -47,12 +47,12 @@ sequenceDiagram
     OS-->>EDP: payload
   end
 
-  EDP->>EDP: Compute QualityMetrics (QM)
+  EDP->>EDP: Compute RunMetrics (RM)
   Note right of EDP: includes DerivedMetric (source=derived)<br/>case-level DP full scan
   EDP->>EDP: Compute ComparisonIndicators (CI)
   Note right of EDP: vs champion/user-selected<br/>rank/Δ/win-rate etc.
 
-  EDP->>DB: UPSERT quality_metrics
+  EDP->>DB: UPSERT run_metrics
   EDP->>DB: UPSERT comparison_indicators
   DB-->>EDP: ok
   EDP-->>API: done(job_id/status)

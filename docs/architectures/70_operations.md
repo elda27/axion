@@ -148,7 +148,7 @@ Object Storageに保存（プロバイダ差し替え可）：
   "runId": "r1",
   "archivedAt": "2026-02-03T12:00:00Z",
   "artifacts": [...],
-  "qualityMetrics": [...],
+  "runMetrics": [...],
   "comparisonIndicators": [...],
   "notes": "optional"
 }

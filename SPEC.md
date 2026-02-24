@@ -5,7 +5,7 @@
 ### 目的
 
 * **成果物（artifact）を本質**として扱い、runの出来栄えを評価・比較し、洞察を得る。
-* **品質指標（Quality Metric）を後から育てる**（再計算可能であることが重要）。
+* **品質指標（Run Metric）を後から育てる**（再計算可能であることが重要）。
 * Langfuse等の観測基盤とは連携するが、**成果物中心の評価・比較・再計算**は本ツールの責務。
 
 ### 背景
@@ -35,18 +35,18 @@
 
   * OutputRowが参照する成果物（JSON/Excel/text/image/HTML/binary等）。
   * 本質は内容物であり、比較・評価の主体。
-* **Quality Metric（品質指標）**
+* **Run Metric（品質指標）**
 
   * あなたの定義する「メトリック」：**ある1つのrunの出来栄えを評価する指標**。
   * 基本は run-level（第一級）。case-levelは第2級の扱い。
 * **Comparison Indicator（比較指標）**
 
-  * run同士の比較結果（例：差分、改善率など）。Quality Metricとは別カテゴリ。
+  * run同士の比較結果（例：差分、改善率など）。Run Metricとは別カテゴリ。
 * **Health/Coverage Indicator（健全性指標）**
 
-  * 評価の信頼性・偏り等（一般性の補助）。Quality Metricとは別カテゴリ。
+  * 評価の信頼性・偏り等（一般性の補助）。Run Metricとは別カテゴリ。
 
-> 以降、「メトリック」という語は基本的に **Quality Metric** を指す。
+> 以降、「メトリック」という語は基本的に **Run Metric** を指す。
 
 ---
 
@@ -82,7 +82,7 @@
 ## 3.2 case-levelの扱い（第2級）
 
 * **保存・UI表示の優先度としてcase-levelは第2級**。
-* ただし、run-levelのQuality Metricを正しく算出するために、**計算上は全数走査が必要**なことがある。
+* ただし、run-levelのRun Metricを正しく算出するために、**計算上は全数走査が必要**なことがある。
 
 ## 3.3 D2: 増分更新・部分推論
 
@@ -94,7 +94,7 @@
 
 ### DPの対象（最小）
 
-* run-levelのQuality Metric（第一級）
+* run-levelのRun Metric（第一級）
 * Health/Coverage（第一級の補助）
 * Comparison Indicator（必要に応じて、runの比較が発生したときに計算）
 
@@ -108,7 +108,7 @@
 
 ## 4. 指標カテゴリの分離（Builtin / User-defined）
 
-## 4.1 Quality Metric（run出来栄え：あなたのメトリック）
+## 4.1 Run Metric（run出来栄え：あなたのメトリック）
 
 * Builtin / User-defined 両方あり得る。
 * Builtinは「最低限の器と集計型（aggregation type）」を提供し、指標自体はユーザー実装が主になり得る。
@@ -148,9 +148,9 @@
 * 入力：`run_id`（+ stage/agent等）
 * 出力：OutputRow一覧（+ artifact）
 
-### Q5. Quality Metricでrunを絞り、最終出力を開く
+### Q5. Run Metricでrunを絞り、最終出力を開く
 
-* 入力：`quality_metric` のTopK/閾値
+* 入力：`run_metric` のTopK/閾値
 * 出力：run一覧 + **最終出力（final OutputRow）のartifactリンク**
 * 重要：runごとの個別取得を避け、`run_id IN (...)`で一括取得
 
@@ -178,7 +178,7 @@ Runを開く目的は「成果物を見る」だけでなく、**洞察を得る
 ### Run詳細のコア問い（優先）
 
 * このrunは**一般的な挙動**か？（偏りや外れ値で判断）
-* 評価値（Quality Metric）は**人の感覚**と相関しているか？（将来の指標育成）
+* 評価値（Run Metric）は**人の感覚**と相関しているか？（将来の指標育成）
 * Championから**改善が見られる**か？（比較）
 
 ※表示がbusyなら段階化（サマリ→ドリルダウン）するが、最初のビューは洞察最短導線に寄せる。

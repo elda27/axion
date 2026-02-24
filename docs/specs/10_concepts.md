@@ -17,7 +17,7 @@ Meaning (stage, agent, etc.) is expressed by user-defined columns.
 ## Artifact
 The actual generated content referenced by OutputRow.
 
-## Quality Metric
+## Run Metric
 A run-level metric that evaluates the quality of a run.
 
 ## Comparison Indicator

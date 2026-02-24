@@ -1,10 +1,9 @@
 """DP Job API router"""
 
-from fastapi import APIRouter, BackgroundTasks, HTTPException, status
-
-from axion_lab_server.apps.api.deps import BatchPath, DPJobRepo
+from axion_lab_server.apps.api.deps import BatchPath, DBSession, DPJobRepo
 from axion_lab_server.ops.dp import DPRunner
 from axion_lab_server.shared.domain import DPJobCreate, DPJobResponse
+from fastapi import APIRouter, BackgroundTasks, HTTPException, status
 
 router = APIRouter(tags=["DP Jobs"])
 
@@ -34,6 +33,7 @@ async def create_dp_job(
     data: DPJobCreate,
     batch: BatchPath,
     repo: DPJobRepo,
+    session: DBSession,
     background_tasks: BackgroundTasks,
 ) -> DPJobResponse:
     """Create and trigger a DP computation job"""
@@ -47,6 +47,9 @@ async def create_dp_job(
 
     # Create job
     job = await repo.create(batch.batch_id, data)
+
+    # Commit so the background task can find the job in its own session
+    await session.commit()
 
     # Start DP runner in background
     background_tasks.add_task(

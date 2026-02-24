@@ -15,7 +15,7 @@ import type {
   PinResponse,
   PinCreate,
   PinType,
-  QualityMetricResponse,
+  RunMetricResponse,
   ComparisonIndicatorResponse,
   DPJobResponse,
   DPJobCreate,
@@ -188,13 +188,13 @@ export function deletePin(runId: string, pinType: PinType) {
   });
 }
 
-// ── Quality Metrics ──
+// ── Run Metrics ──
 
-export function getRunQualityMetrics(runId: string) {
-  return request<QualityMetricResponse[]>(`/runs/${runId}/quality-metrics`);
+export function getRunMetrics(runId: string) {
+  return request<RunMetricResponse[]>(`/runs/${runId}/run-metrics`);
 }
 
-export function getBatchQualityMetrics(
+export function getBatchRunMetrics(
   batchId: string,
   key?: string,
   limit = 100,
@@ -203,8 +203,8 @@ export function getBatchQualityMetrics(
   const params = new URLSearchParams({ limit: String(limit) });
   if (key) params.set("key", key);
   if (cursor) params.set("cursor", cursor);
-  return request<CursorPaginatedResponse<QualityMetricResponse>>(
-    `/batches/${batchId}/quality-metrics?${params}`,
+  return request<CursorPaginatedResponse<RunMetricResponse>>(
+    `/batches/${batchId}/run-metrics?${params}`,
   );
 }
 
@@ -305,7 +305,7 @@ export function removeAggregationMember(aggregationId: string, runId: string) {
   });
 }
 
-export function getAggregationQualityMetrics(
+export function getAggregationRunMetrics(
   aggregationId: string,
   key?: string,
   limit = 100,
@@ -314,8 +314,8 @@ export function getAggregationQualityMetrics(
   const params = new URLSearchParams({ limit: String(limit) });
   if (key) params.set("key", key);
   if (cursor) params.set("cursor", cursor);
-  return request<CursorPaginatedResponse<QualityMetricResponse>>(
-    `/aggregations/${aggregationId}/quality-metrics?${params}`,
+  return request<CursorPaginatedResponse<RunMetricResponse>>(
+    `/aggregations/${aggregationId}/run-metrics?${params}`,
   );
 }
 

@@ -10,10 +10,10 @@ import {
   Chip,
   Box,
 } from "@mui/material";
-import type { QualityMetricResponse } from "../types";
+import type { RunMetricResponse } from "../types";
 
-interface QualityMetricsTableProps {
-  metrics: QualityMetricResponse[];
+interface RunMetricsTableProps {
+  metrics: RunMetricResponse[];
 }
 
 function formatValue(value: unknown): string {
@@ -30,14 +30,12 @@ const sourceColor: Record<string, "primary" | "secondary" | "default"> = {
   manual: "default",
 };
 
-export default function QualityMetricsTable({
-  metrics,
-}: QualityMetricsTableProps) {
+export default function RunMetricsTable({ metrics }: RunMetricsTableProps) {
   if (metrics.length === 0) {
     return (
       <Box sx={{ py: 3, textAlign: "center" }}>
         <Typography color="text.secondary" variant="body2">
-          No quality metrics available
+          No run metrics available
         </Typography>
       </Box>
     );
@@ -53,6 +51,7 @@ export default function QualityMetricsTable({
               Value
             </TableCell>
             <TableCell sx={{ fontWeight: 700 }}>Source</TableCell>
+            <TableCell sx={{ fontWeight: 700 }}>Evaluation Type</TableCell>
             <TableCell sx={{ fontWeight: 700 }}>Computed</TableCell>
           </TableRow>
         </TableHead>
@@ -80,6 +79,19 @@ export default function QualityMetricsTable({
                   color={sourceColor[m.source] ?? "default"}
                   variant="outlined"
                 />
+              </TableCell>
+              <TableCell>
+                {m.evaluationTypes.length > 0 ? (
+                  <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap" }}>
+                    {m.evaluationTypes.map((t) => (
+                      <Chip key={t} label={t} size="small" variant="outlined" />
+                    ))}
+                  </Box>
+                ) : (
+                  <Typography variant="caption" color="text.disabled">
+                    —
+                  </Typography>
+                )}
               </TableCell>
               <TableCell>
                 <Typography variant="caption" color="text.secondary">

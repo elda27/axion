@@ -5,7 +5,7 @@
 DP Runner は**埋め込み実行器**であり、以下を唯一の仕事とする：
 
 > Artifact（評価結果・ログ・参照）から  
-> **Quality Metric（QM）** と **Comparison Indicator（CI）** を計算し  
+> **Run Metric（RM）** と **Comparison Indicator（CI）** を計算し  
 > Registry DB に保存する
 
 外部ツール（Langfuse等）を直接使っても良いが、原則の一次入力は Artifact。
@@ -69,7 +69,7 @@ flowchart TD
   A[Fetch active runs] --> B[Load Artifacts]
   B --> C[Decode by schema]
   C --> D[Build Case Matrix]
-  D --> E[Compute Quality Metrics]
+  D --> E[Compute Run Metrics]
   E --> F[Compute Comparison Indicators]
   F --> G[Persist QM/CI]
 ```
@@ -110,9 +110,9 @@ Matrix[c][r] = score of run r on case c (NaN if missing)
 
 ---
 
-## Quality Metric（QM）の計算
+## Run Metric（RM）の計算
 
-QM は Run単位で得られる"質"。
+RM は Run単位で得られる"質"。
 
 ### Run-level（第1級）
 
@@ -220,11 +220,11 @@ DP Runnerは**必ず2種類のテーブルに書く**
 
 | 種類                       | 保存先                  |
 | -------------------------- | ----------------------- |
-| Quality Metric（QM）       | `quality_metrics`       |
+| Run Metric（RM）           | `run_metrics`           |
 | Comparison Indicator（CI） | `comparison_indicators` |
 
-- DerivedMetric = QM where `source="derived"`
-- CI は QM とは混ぜない（キー空間も分離）
+- DerivedMetric = RM where `source="derived"`
+- CI は RM とは混ぜない（キー空間も分離）
 
 ---
 
@@ -248,7 +248,7 @@ pytestから：
 
 1. Run + Artifact（inline_json）を登録
 2. `POST /dp/compute`
-3. `GET /quality-metrics`
+3. `GET /run-metrics`
 4. `GET /comparison-indicators`
 5. 値を assert
 

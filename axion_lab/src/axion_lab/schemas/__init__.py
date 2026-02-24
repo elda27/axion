@@ -25,16 +25,16 @@ from axion_lab.schemas.dp_job import (
 from axion_lab.schemas.org import OrgCreate, OrgResponse
 from axion_lab.schemas.pagination import CursorPaginatedResponse, PaginationParams
 from axion_lab.schemas.project import ProjectCreate, ProjectResponse
-from axion_lab.schemas.quality_metric import (
-    QualityMetricResponse,
-    QualityMetricSource,
-)
 from axion_lab.schemas.run import (
     RunCreate,
     RunResponse,
     RunStatus,
     RunSummaryResponse,
     RunUpdate,
+)
+from axion_lab.schemas.run_metric import (
+    RunMetricResponse,
+    RunMetricSource,
 )
 from axion_lab.schemas.run_pin import PinCreate, PinResponse, PinType
 
@@ -68,9 +68,9 @@ __all__ = [
     "PinCreate",
     "PinResponse",
     "PinType",
-    # QualityMetric
-    "QualityMetricResponse",
-    "QualityMetricSource",
+    # RunMetric
+    "RunMetricResponse",
+    "RunMetricSource",
     # ComparisonIndicator
     "ComparisonIndicatorResponse",
     # DPJob

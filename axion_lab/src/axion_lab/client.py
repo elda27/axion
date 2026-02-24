@@ -32,8 +32,8 @@ from axion_lab.services.dp import DPService
 from axion_lab.services.org import OrgService
 from axion_lab.services.pin import PinService
 from axion_lab.services.project import ProjectService
-from axion_lab.services.quality_metric import QualityMetricService
 from axion_lab.services.run import RunService
+from axion_lab.services.run_metric import RunMetricService
 
 _DEFAULT_BASE_URL = "http://localhost:8000"
 
@@ -63,7 +63,9 @@ class AxionLabClient:
         api_prefix: str = "/v1",
         timeout: float = 30.0,
     ) -> None:
-        resolved_url = base_url or os.environ.get("AXION_LAB_BASE_URL", _DEFAULT_BASE_URL)
+        resolved_url = base_url or os.environ.get(
+            "AXION_LAB_BASE_URL", _DEFAULT_BASE_URL
+        )
         self._base_url = resolved_url.rstrip("/")
         self._api_url = f"{self._base_url}{api_prefix}"
 
@@ -78,7 +80,7 @@ class AxionLabClient:
         self._runs = RunService(self._http)
         self._artifacts = ArtifactService(self._http)
         self._pins = PinService(self._http)
-        self._quality_metrics = QualityMetricService(self._http)
+        self._run_metrics = RunMetricService(self._http)
         self._comparison_indicators = ComparisonIndicatorService(self._http)
         self._dp = DPService(self._http)
 
@@ -120,9 +122,9 @@ class AxionLabClient:
         return self._pins
 
     @property
-    def quality_metrics(self) -> QualityMetricService:
-        """Quality metric operations (read-only, computed via DP)."""
-        return self._quality_metrics
+    def run_metrics(self) -> RunMetricService:
+        """Run metric operations (read-only, computed via DP)."""
+        return self._run_metrics
 
     @property
     def comparison_indicators(self) -> ComparisonIndicatorService:

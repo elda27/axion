@@ -2,7 +2,7 @@
 
 Metrics are divided into three namespaces.
 
-## Quality Metrics
+## Run Metrics
 Evaluate one run.
 
 ## Comparison Indicators

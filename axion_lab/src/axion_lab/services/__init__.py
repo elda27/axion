@@ -14,8 +14,8 @@ from axion_lab.services.dp import DPService
 from axion_lab.services.org import OrgService
 from axion_lab.services.pin import PinService
 from axion_lab.services.project import ProjectService
-from axion_lab.services.quality_metric import QualityMetricService
 from axion_lab.services.run import RunService
+from axion_lab.services.run_metric import RunMetricService
 
 __all__ = [
     "AxionLabHTTPError",
@@ -27,7 +27,7 @@ __all__ = [
     "RunService",
     "ArtifactService",
     "PinService",
-    "QualityMetricService",
+    "RunMetricService",
     "ComparisonIndicatorService",
     "DPService",
 ]

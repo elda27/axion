@@ -10,8 +10,8 @@ from axion_lab_server.repos.models.entities import (
     DPJob,
     Org,
     Project,
-    QualityMetric,
     Run,
+    RunMetric,
     RunPin,
 )
 
@@ -25,7 +25,7 @@ __all__ = [
     "Run",
     "RunPin",
     "Artifact",
-    "QualityMetric",
+    "RunMetric",
     "ComparisonIndicator",
     "DPJob",
 ]

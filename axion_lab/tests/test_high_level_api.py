@@ -189,6 +189,79 @@ def test_create_artifact_requires_run_id_without_active_run(_env_context: None) 
         )
 
 
+def test_create_run_with_explicit_org_and_project(_env_context: None) -> None:
+    """org / project kwargs override environment variables."""
+    client = _FakeClient(
+        org_items=[_Named(name="Custom-Org", id_value="org-custom")],
+        project_items=[_Named(name="Custom-Project", id_value="project-custom")],
+        batch_items=[_Named(name="Batch-A", id_value="batch-1")],
+    )
+
+    run = create_run(
+        "run-d",
+        org="Custom-Org",
+        project="Custom-Project",
+        client=client,  # type: ignore[arg-type]
+    )
+
+    assert run.run_id == "run-001"
+    # The run should have been created using the custom org/project context
+    assert client.runs.calls == [("batch-1", "run-d", None, None)]
+
+
+def test_create_run_with_explicit_org_only(_env_context: None) -> None:
+    """Only org kwarg overrides; project falls back to env var."""
+    client = _FakeClient(
+        org_items=[_Named(name="Override-Org", id_value="org-override")],
+        project_items=[_Named(name="Project-A", id_value="project-1")],
+        batch_items=[_Named(name="Batch-A", id_value="batch-1")],
+    )
+
+    run = create_run("run-e", org="Override-Org", client=client)  # type: ignore[arg-type]
+
+    assert run.run_id == "run-001"
+    assert client.runs.calls == [("batch-1", "run-e", None, None)]
+
+
+def test_create_run_with_explicit_project_only(_env_context: None) -> None:
+    """Only project kwarg overrides; org falls back to env var."""
+    client = _FakeClient(
+        org_items=[_Named(name="Org-A", id_value="org-1")],
+        project_items=[_Named(name="Override-Project", id_value="project-override")],
+        batch_items=[_Named(name="Batch-A", id_value="batch-1")],
+    )
+
+    run = create_run("run-f", project="Override-Project", client=client)  # type: ignore[arg-type]
+
+    assert run.run_id == "run-001"
+    assert client.runs.calls == [("batch-1", "run-f", None, None)]
+
+
+def test_create_run_explicit_args_bypass_missing_env(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """When org/project are passed explicitly, the env vars are not required."""
+    monkeypatch.delenv("AXION_LAB_ORG", raising=False)
+    monkeypatch.delenv("AXION_LAB_PROJECT", raising=False)
+    monkeypatch.setenv("AXION_LAB_BATCH", "Batch-X")
+
+    client = _FakeClient(
+        org_items=[_Named(name="Arg-Org", id_value="org-arg")],
+        project_items=[_Named(name="Arg-Project", id_value="project-arg")],
+        batch_items=[_Named(name="Batch-X", id_value="batch-x")],
+    )
+
+    run = create_run(
+        "run-g",
+        org="Arg-Org",
+        project="Arg-Project",
+        client=client,  # type: ignore[arg-type]
+    )
+
+    assert run.run_id == "run-001"
+    assert client.runs.calls == [("batch-x", "run-g", None, None)]
+
+
 def test_create_run_requires_env(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("AXION_LAB_ORG", raising=False)
     monkeypatch.delenv("AXION_LAB_PROJECT", raising=False)

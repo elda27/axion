@@ -1,4 +1,4 @@
-"""Quality Metric schemas"""
+"""Run Metric schemas"""
 
 import json
 from datetime import datetime
@@ -8,22 +8,23 @@ from typing import Any
 from pydantic import BaseModel, Field, field_validator
 
 
-class QualityMetricSource(StrEnum):
-    """Quality Metric source enumeration"""
+class RunMetricSource(StrEnum):
+    """Run Metric source enumeration"""
 
     RAW = "raw"
     DERIVED = "derived"
     MANUAL = "manual"
 
 
-class QualityMetricResponse(BaseModel):
-    """Schema for quality metric response"""
+class RunMetricResponse(BaseModel):
+    """Schema for run metric response"""
 
     qm_id: str = Field(..., alias="qmId")
     run_id: str = Field(..., alias="runId")
     key: str
     value: Any
-    source: QualityMetricSource
+    source: RunMetricSource
+    evaluation_types: list[str] = Field(default_factory=list, alias="evaluationTypes")
     computed_at: datetime = Field(..., alias="computedAt")
     version: int
 

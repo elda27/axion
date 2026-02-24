@@ -1,4 +1,4 @@
-"""DP Runner - computes Quality Metrics and Comparison Indicators"""
+"""DP Runner - computes Run Metrics and Comparison Indicators"""
 
 import logging
 from dataclasses import dataclass
@@ -10,7 +10,7 @@ from axion_lab_server.repos import (
     ArtifactRepository,
     ComparisonIndicatorRepository,
     DPJobRepository,
-    QualityMetricRepository,
+    RunMetricRepository,
     RunPinRepository,
     RunRepository,
 )
@@ -18,7 +18,7 @@ from axion_lab_server.repos.models.entities import Artifact, Run
 from axion_lab_server.shared.domain import (
     DPJobMode,
     DPJobStatus,
-    QualityMetricSource,
+    RunMetricSource,
 )
 from axion_lab_server.shared.kernel import get_session
 
@@ -34,7 +34,7 @@ class RunScores:
 
 
 class DPRunner:
-    """Runner for DP jobs (Quality Metrics and Comparison Indicators)"""
+    """Runner for DP jobs (Run Metrics and Comparison Indicators)"""
 
     @staticmethod
     async def run_job(job_id: str) -> None:
@@ -43,7 +43,7 @@ class DPRunner:
             job_repo = DPJobRepository(session)
             run_repo = RunRepository(session)
             artifact_repo = ArtifactRepository(session)
-            qm_repo = QualityMetricRepository(session)
+            rm_repo = RunMetricRepository(session)
             ci_repo = ComparisonIndicatorRepository(session)
             pin_repo = RunPinRepository(session)
 
@@ -87,10 +87,10 @@ class DPRunner:
                 all_run_scores: list[RunScores] = []
                 for run in all_runs:
                     if bool(job.recompute):
-                        await qm_repo.delete_by_run(run.run_id)
+                        await rm_repo.delete_by_run(run.run_id)
                         await ci_repo.delete_by_run(run.run_id)
 
-                    await DPRunner._compute_qm(run, artifact_repo, qm_repo)
+                    await DPRunner._compute_qm(run, artifact_repo, rm_repo)
 
                     run_scores = await DPRunner._extract_scores(run, artifact_repo)
                     if run_scores:
@@ -157,9 +157,11 @@ class DPRunner:
     ) -> dict[str, Any]:
         """Extract raw metrics from run artifacts"""
         artifacts, _ = await artifact_repo.list_by_run(run.run_id, limit=100)
-        metrics_artifacts = [a for a in artifacts if a.kind == "metrics"]
 
         raw_metrics: dict[str, Any] = {}
+
+        # Handle "metrics" kind (JSON dict of multiple metrics)
+        metrics_artifacts = [a for a in artifacts if a.kind == "metrics"]
         for artifact in metrics_artifacts:
             try:
                 payload = await DPRunner._get_artifact_payload_async(
@@ -172,15 +174,30 @@ class DPRunner:
                     f"Failed to extract metrics from artifact {artifact.artifact_id}: {e}"
                 )
 
+        # Handle "inline_number" kind (single numeric metric per artifact)
+        # Per spec: inline_number artifacts are directly copied as RM (source=raw)
+        inline_artifacts = [a for a in artifacts if a.kind == "inline_number"]
+        for artifact in inline_artifacts:
+            try:
+                payload = artifact_repo.get_payload(artifact)
+                if payload is not None and isinstance(payload, (int, float)):
+                    key = artifact.label or artifact.type or artifact.artifact_id
+                    raw_metrics[key] = payload
+            except Exception as e:
+                logger.warning(
+                    f"Failed to extract inline metric from artifact "
+                    f"{artifact.artifact_id}: {e}"
+                )
+
         return raw_metrics
 
     @staticmethod
     async def _compute_qm(
         run: Run,
         artifact_repo: ArtifactRepository,
-        qm_repo: QualityMetricRepository,
+        rm_repo: RunMetricRepository,
     ) -> None:
-        """Compute Quality Metrics for a run"""
+        """Compute Run Metrics for a run"""
         # Extract scores
         run_scores = await DPRunner._extract_scores(run, artifact_repo)
 
@@ -189,32 +206,32 @@ class DPRunner:
 
             # Mean score
             mean_score = mean(scores)
-            await qm_repo.upsert(
+            await rm_repo.upsert(
                 run_id=run.run_id,
                 key="mean_score",
-                source=QualityMetricSource.DERIVED,
+                source=RunMetricSource.DERIVED,
                 value=round(mean_score, 6),
             )
 
             # Min/max scores
-            await qm_repo.upsert(
+            await rm_repo.upsert(
                 run_id=run.run_id,
                 key="min_score",
-                source=QualityMetricSource.DERIVED,
+                source=RunMetricSource.DERIVED,
                 value=round(min(scores), 6),
             )
-            await qm_repo.upsert(
+            await rm_repo.upsert(
                 run_id=run.run_id,
                 key="max_score",
-                source=QualityMetricSource.DERIVED,
+                source=RunMetricSource.DERIVED,
                 value=round(max(scores), 6),
             )
 
             # Case count
-            await qm_repo.upsert(
+            await rm_repo.upsert(
                 run_id=run.run_id,
                 key="case_count",
-                source=QualityMetricSource.DERIVED,
+                source=RunMetricSource.DERIVED,
                 value=len(scores),
             )
 
@@ -222,10 +239,10 @@ class DPRunner:
         raw_metrics = await DPRunner._extract_raw_metrics(run, artifact_repo)
         for key, value in raw_metrics.items():
             if isinstance(value, (int, float, bool)):
-                await qm_repo.upsert(
+                await rm_repo.upsert(
                     run_id=run.run_id,
                     key=key,
-                    source=QualityMetricSource.RAW,
+                    source=RunMetricSource.RAW,
                     value=value,
                 )
 

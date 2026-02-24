@@ -46,7 +46,7 @@ uv run python examples/quickstart.py
 
 ### 2. `evaluation_workflow.py` — 評価ワークフロー
 
-複数の Run を作成し、スコア Artifact を登録した後、DP（差分再計算）ジョブを実行して品質指標 (Quality Metric) と比較指標 (Comparison Indicator) を自動算出するフローを示します。
+複数の Run を作成し、スコア Artifact を登録した後、DP（差分再計算）ジョブを実行して品質指標 (Run Metric) と比較指標 (Comparison Indicator) を自動算出するフローを示します。
 
 ```bash
 uv run python examples/evaluation_workflow.py
@@ -62,8 +62,8 @@ uv run python examples/champion_comparison.py
 
 ## 環境変数
 
-| 変数名           | デフォルト値            | 説明                   |
-| ---------------- | ----------------------- | ---------------------- |
+| 変数名               | デフォルト値            | 説明                       |
+| -------------------- | ----------------------- | -------------------------- |
 | `AXION_LAB_BASE_URL` | `http://localhost:8000` | Axion Lab API のベース URL |
 
 ```bash

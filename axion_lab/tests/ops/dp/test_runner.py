@@ -2,9 +2,8 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock
 
 import pytest
-
 from axion_lab_server.ops.dp.runner import DPRunner, RunScores
-from axion_lab_server.shared.domain import QualityMetricSource
+from axion_lab_server.shared.domain import RunMetricSource
 
 
 def _run(*, run_id: str = "run-1"):
@@ -102,7 +101,7 @@ class TestComputeQM:
 
         mean_call = next(c for c in calls if c.kwargs["key"] == "mean_score")
         assert mean_call.kwargs["value"] == 0.9
-        assert mean_call.kwargs["source"] == QualityMetricSource.DERIVED
+        assert mean_call.kwargs["source"] == RunMetricSource.DERIVED
 
     @pytest.mark.asyncio
     async def test_stores_raw_metrics(self) -> None:
@@ -125,7 +124,36 @@ class TestComputeQM:
         assert "throughput" in keys
 
         latency_call = next(c for c in calls if c.kwargs["key"] == "latency")
-        assert latency_call.kwargs["source"] == QualityMetricSource.RAW
+        assert latency_call.kwargs["source"] == RunMetricSource.RAW
+
+    @pytest.mark.asyncio
+    async def test_stores_inline_number_as_raw_metrics(self) -> None:
+        """inline_number artifacts should be directly copied as RM (source=raw)"""
+        run = _run(run_id="run-1")
+        inline_art = SimpleNamespace(
+            artifact_id="art-inline",
+            type="evaluation",
+            kind="inline_number",
+            label="ROUGE-L Score",
+            payload_text=None,
+            payload_number=0.847,
+        )
+        artifact_repo = Mock()
+        artifact_repo.list_by_run = AsyncMock(return_value=([inline_art], None))
+        artifact_repo.get_payload = Mock(return_value=0.847)
+
+        qm_repo = Mock()
+        qm_repo.upsert = AsyncMock()
+
+        await DPRunner._compute_qm(run, artifact_repo, qm_repo)
+
+        calls = qm_repo.upsert.await_args_list
+        keys = [c.kwargs["key"] for c in calls]
+        assert "ROUGE-L Score" in keys
+
+        rouge_call = next(c for c in calls if c.kwargs["key"] == "ROUGE-L Score")
+        assert rouge_call.kwargs["value"] == 0.847
+        assert rouge_call.kwargs["source"] == RunMetricSource.RAW
 
 
 class TestComputeCI:

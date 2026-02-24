@@ -8,7 +8,7 @@ from axion_lab_server.apps.api.routers.dp import router as dp_router
 from axion_lab_server.apps.api.routers.orgs import router as orgs_router
 from axion_lab_server.apps.api.routers.pins import router as pins_router
 from axion_lab_server.apps.api.routers.projects import router as projects_router
-from axion_lab_server.apps.api.routers.quality_metrics import router as qm_router
+from axion_lab_server.apps.api.routers.run_metrics import router as rm_router
 from axion_lab_server.apps.api.routers.runs import router as runs_router
 
 __all__ = [
@@ -19,7 +19,7 @@ __all__ = [
     "runs_router",
     "artifacts_router",
     "pins_router",
-    "qm_router",
+    "rm_router",
     "ci_router",
     "dp_router",
 ]

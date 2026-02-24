@@ -2,14 +2,13 @@
 
 import json
 
-from fastapi import APIRouter, status
-
 from axion_lab_server.apps.api.deps import (
     AggregationPath,
     AggregationRepo,
+    ArtifactRepo,
     CIRepo,
     ProjectPath,
-    QMRepo,
+    RMRepo,
 )
 from axion_lab_server.shared.domain import (
     AggregationCreate,
@@ -18,8 +17,9 @@ from axion_lab_server.shared.domain import (
     AggregationResponse,
     ComparisonIndicatorResponse,
     CursorPaginatedResponse,
-    QualityMetricResponse,
+    RunMetricResponse,
 )
+from fastapi import APIRouter, status
 
 router = APIRouter(tags=["Aggregations"])
 
@@ -172,18 +172,10 @@ async def remove_member(
 # ── Metrics across aggregation members ────────────────────────
 
 
-def _build_qm_response(qm) -> QualityMetricResponse:
-    """Build quality metric response"""
-    value = json.loads(qm.value_json) if qm.value_json else None
-    return QualityMetricResponse(
-        qmId=qm.qm_id,
-        runId=qm.run_id,
-        key=qm.key,
-        value=value,
-        source=qm.source,
-        computedAt=qm.computed_at,
-        version=qm.version,
-    )
+from axion_lab_server.apps.api.routers.run_metrics import (
+    _build_rm_response,
+    _get_evaluation_types_by_run,
+)
 
 
 def _build_ci_response(ci) -> ComparisonIndicatorResponse:
@@ -201,22 +193,28 @@ def _build_ci_response(ci) -> ComparisonIndicatorResponse:
 
 
 @router.get(
-    "/aggregations/{aggregation_id}/quality-metrics",
-    response_model=CursorPaginatedResponse[QualityMetricResponse],
+    "/aggregations/{aggregation_id}/run-metrics",
+    response_model=CursorPaginatedResponse[RunMetricResponse],
 )
-async def list_quality_metrics_by_aggregation(
+async def list_run_metrics_by_aggregation(
     aggregation: AggregationPath,
-    repo: QMRepo,
+    repo: RMRepo,
+    artifact_repo: ArtifactRepo,
     key: str | None = None,
     limit: int = 100,
     cursor: str | None = None,
-) -> CursorPaginatedResponse[QualityMetricResponse]:
-    """List quality metrics for all runs in an aggregation"""
+) -> CursorPaginatedResponse[RunMetricResponse]:
+    """List run metrics for all runs in an aggregation"""
     metrics, next_cursor = await repo.list_by_aggregation(
         aggregation.aggregation_id, key=key, limit=limit, cursor=cursor
     )
+    run_ids = list({m.run_id for m in metrics})
+    type_map = await _get_evaluation_types_by_run(artifact_repo.session, run_ids)
     return CursorPaginatedResponse(
-        items=[_build_qm_response(m) for m in metrics],
+        items=[
+            _build_rm_response(m, evaluation_types=type_map.get(m.run_id, []))
+            for m in metrics
+        ],
         next_cursor=next_cursor,
         has_more=next_cursor is not None,
     )

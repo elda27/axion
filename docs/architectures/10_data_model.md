@@ -60,7 +60,7 @@ classDiagram
     +meta_json
   }
 
-  class QualityMetric {
+  class RunMetric {
     +qm_id
     +run_id
     +key
@@ -95,27 +95,27 @@ classDiagram
   AggregationMember "many" --> "1" Run
   Batch "1" --> "many" Run
   Run "1" --> "many" Artifact
-  Run "1" --> "many" QualityMetric
+  Run "1" --> "many" RunMetric
   Run "1" --> "many" ComparisonIndicator
   Run "1" --> "many" Pin
 
-  note for QualityMetric "DerivedMetric は QualityMetric の一種\n(source=derived などで表現)"
+  note for RunMetric "DerivedMetric は RunMetric の一種\n(source=derived などで表現)"
   note for ComparisonIndicator "比較用: Δ, rank, win-rate,\nchampion差分など"
 ```
 
 ## 用語の正規化
 
-### Quality Metric（QM）と Comparison Indicator（CI）
+### Run Metric（RM）と Comparison Indicator（CI）
 
 | 区分                           | 説明                                | 例                                                                                                        |
 | ------------------------------ | ----------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| **Quality Metric（QM）**       | 「そのRunがどれだけ良いか」を表す値 | Accuracy、F1、BLEU、Aesthetic score、コスト、レイテンシ                                                   |
+| **Run Metric（RM）**           | 「そのRunがどれだけ良いか」を表す値 | Accuracy、F1、BLEU、Aesthetic score、コスト、レイテンシ                                                   |
 | **Comparison Indicator（CI）** | 「Run同士を比較するための指標」     | Championとの差分（Δ）、ランキング（順位、percentile）、勝率 / ペアワイズ勝ち負け、改善率（relative lift） |
 
-> **重要**: DerivedMetric は Quality Metric の一種（＝計算で導出されたQM）  
-> CIはQMから導かれることが多いが、同一ではない
+> **重要**: DerivedMetric は Run Metric の一種（＝計算で導出されたRM）  
+> CIはRMから導かれることが多いが、同一ではない
 
-**仕様として**: UIは "QM" を基本表示軸にし、CIは "比較ビュー/補助情報" として扱う（同じテーブル/キー空間に混ぜない）
+**仕様として**: UIは "RM" を基本表示軸にし、CIは "比較ビュー/補助情報" として扱う（同じテーブル/キー空間に混ぜない）
 
 ### Artifact（参照＋小さい値）
 
@@ -144,7 +144,7 @@ Artifact = {kind, type, label, payload, meta}
 | `inline_number` | `0.913`                                                        |
 | `inline_json`   | `{...}`                                                        |
 
-### Quality Metric（QM）
+### Run Metric（RM）
 
 | フィールド               | 説明                                                                  |
 | ------------------------ | --------------------------------------------------------------------- |

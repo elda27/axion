@@ -10,13 +10,21 @@ import {
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import PushPinIcon from "@mui/icons-material/PushPin";
 import RunStatusChip from "./RunStatusChip";
-import type { RunResponse } from "../types";
+import type { RunResponse, RunMetricResponse } from "../types";
 
 interface RunCardProps {
   run: RunResponse;
   pinLabel?: "champion" | "user_selected" | null;
   onClick?: () => void;
   compact?: boolean;
+  metrics?: RunMetricResponse[];
+}
+
+function formatMetricValue(value: unknown): string {
+  if (typeof value === "number") {
+    return Number.isInteger(value) ? String(value) : value.toFixed(4);
+  }
+  return String(value);
 }
 
 export default function RunCard({
@@ -24,7 +32,9 @@ export default function RunCard({
   pinLabel,
   onClick,
   compact,
+  metrics,
 }: RunCardProps) {
+  const displayMetrics = (metrics ?? []).slice(0, 3);
   return (
     <Card
       sx={{
@@ -51,7 +61,7 @@ export default function RunCard({
             <RunStatusChip status={run.status} />
           </Box>
 
-          {!compact && (
+          {!compact && run.tags.length > 0 && (
             <Stack
               direction="row"
               spacing={0.5}
@@ -63,13 +73,24 @@ export default function RunCard({
             </Stack>
           )}
 
-          <Typography
-            variant="caption"
-            color="text.secondary"
-            sx={{ mt: 0.5, display: "block" }}
-          >
-            {new Date(run.createdAt).toLocaleString()}
-          </Typography>
+          {displayMetrics.length > 0 && (
+            <Stack
+              direction="row"
+              spacing={1}
+              sx={{ mt: 0.5, flexWrap: "wrap" }}
+            >
+              {displayMetrics.map((m) => (
+                <Chip
+                  key={m.qmId}
+                  label={`${m.key}: ${formatMetricValue(m.value)}`}
+                  size="small"
+                  variant="outlined"
+                  color="info"
+                  sx={{ fontFamily: "monospace", fontSize: "0.75rem" }}
+                />
+              ))}
+            </Stack>
+          )}
         </CardContent>
       </CardActionArea>
     </Card>

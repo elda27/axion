@@ -2,6 +2,7 @@
 
 from datetime import datetime
 
+from axion_lab_server.repos.models.base import Base
 from sqlalchemy import (
     DateTime,
     Float,
@@ -13,8 +14,6 @@ from sqlalchemy import (
     UniqueConstraint,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
-from axion_lab_server.repos.models.base import Base
 
 
 class Org(Base):
@@ -113,8 +112,8 @@ class Run(Base):
     artifacts: Mapped[list["Artifact"]] = relationship(
         "Artifact", back_populates="run", cascade="all, delete-orphan"
     )
-    quality_metrics: Mapped[list["QualityMetric"]] = relationship(
-        "QualityMetric", back_populates="run", cascade="all, delete-orphan"
+    run_metrics: Mapped[list["RunMetric"]] = relationship(
+        "RunMetric", back_populates="run", cascade="all, delete-orphan"
     )
     comparison_indicators: Mapped[list["ComparisonIndicator"]] = relationship(
         "ComparisonIndicator", back_populates="run", cascade="all, delete-orphan"
@@ -202,10 +201,10 @@ class Artifact(Base):
     )
 
 
-class QualityMetric(Base):
-    """Quality Metric entity (run quality indicators)"""
+class RunMetric(Base):
+    """Run Metric entity (run quality indicators)"""
 
-    __tablename__ = "quality_metrics"
+    __tablename__ = "run_metrics"
 
     qm_id: Mapped[str] = mapped_column(String(26), primary_key=True)
     run_id: Mapped[str] = mapped_column(
@@ -222,11 +221,11 @@ class QualityMetric(Base):
     version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
 
     # Relationships
-    run: Mapped["Run"] = relationship("Run", back_populates="quality_metrics")
+    run: Mapped["Run"] = relationship("Run", back_populates="run_metrics")
 
     __table_args__ = (
-        Index("ix_quality_metrics_run_computed", "run_id", "computed_at"),
-        UniqueConstraint("run_id", "key", "version", name="uq_qm_run_key_version"),
+        Index("ix_run_metrics_run_computed", "run_id", "computed_at"),
+        UniqueConstraint("run_id", "key", "version", name="uq_rm_run_key_version"),
     )
 
 

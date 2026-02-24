@@ -2,7 +2,7 @@
 """Axion Lab 評価ワークフロー: 複数 Run のスコア比較と DP 計算.
 
 複数の Run を作成し、それぞれにスコア Artifact を登録した後、
-DP（差分再計算）ジョブを実行して品質指標 (Quality Metric) と
+DP（差分再計算）ジョブを実行して品質指標 (Run Metric) と
 比較指標 (Comparison Indicator) を自動算出するフローを示します。
 
 Usage:
@@ -152,10 +152,10 @@ def main() -> None:
         print(f"  Error: {job_status.error_text or 'unknown'}")
         return
 
-    # ── 5. Quality Metrics 確認 ────────────────────────────────
-    print("\n=== Quality Metrics (per Run) ===")
+    # ── 5. Run Metrics 確認 ────────────────────────────────
+    print("\n=== Run Metrics (per Run) ===")
     for run_id in run_ids:
-        qm = client.quality_metrics.list_by_run(run_id)
+        qm = client.run_metrics.list_by_run(run_id)
         if not qm.items:
             print(f"  Run {run_id[:8]}...: (no metrics computed)")
             continue
@@ -164,8 +164,8 @@ def main() -> None:
             print(f"    {m.key}: {m.value} (source={m.source})")
 
     # Batch 単位でキー別にまとめて取得
-    print("\n=== Quality Metrics (Batch-level, key=mean_score) ===")
-    batch_qm = client.quality_metrics.list_by_batch(batch.batch_id, key="mean_score")
+    print("\n=== Run Metrics (Batch-level, key=mean_score) ===")
+    batch_qm = client.run_metrics.list_by_batch(batch.batch_id, key="mean_score")
     for m in batch_qm.items:
         print(f"  run={m.run_id[:8]}... mean_score={m.value}")
 
@@ -195,7 +195,7 @@ def main() -> None:
     print(f"  Batch: {batch.name} ({batch.batch_id})")
     print(f"  Runs: {len(run_ids)}")
     print(f"  Champion: {run_ids[0][:8]}...")
-    print("  DP job completed — Quality Metrics and Comparison Indicators computed.")
+    print("  DP job completed — Run Metrics and Comparison Indicators computed.")
 
 
 if __name__ == "__main__":

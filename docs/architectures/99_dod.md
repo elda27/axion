@@ -30,7 +30,7 @@
 
 ## 次にやるべき実装チケット（そのまま分割可能）
 
-1. DBスキーマ作成（runs/artifacts/quality_metrics/comparison_indicators/pins）
+1. DBスキーマ作成（runs/artifacts/run_metrics/comparison_indicators/pins）
 2. Run CRUD API
 3. Artifact CRUD API
 4. Run一覧UI（garbage非表示、フィルタ、固定枠）

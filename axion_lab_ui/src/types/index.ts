@@ -146,15 +146,16 @@ export interface PinCreate {
   pinType: PinType;
 }
 
-// ── Quality Metric ──
-export type QualityMetricSource = "raw" | "derived" | "manual";
+// ── Run Metric ──
+export type RunMetricSource = "raw" | "derived" | "manual";
 
-export interface QualityMetricResponse {
+export interface RunMetricResponse {
   qmId: string;
   runId: string;
   key: string;
   value: unknown;
-  source: QualityMetricSource;
+  source: RunMetricSource;
+  evaluationTypes: string[];
   computedAt: string;
   version: number;
 }

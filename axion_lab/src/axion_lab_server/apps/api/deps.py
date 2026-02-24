@@ -3,9 +3,6 @@
 from collections.abc import AsyncGenerator
 from typing import Annotated
 
-from fastapi import Depends, HTTPException, Path, status
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from axion_lab_server.repos import (
     AggregationRepository,
     ArtifactRepository,
@@ -14,12 +11,14 @@ from axion_lab_server.repos import (
     DPJobRepository,
     OrgRepository,
     ProjectRepository,
-    QualityMetricRepository,
+    RunMetricRepository,
     RunPinRepository,
     RunRepository,
 )
 from axion_lab_server.repos.models.entities import Aggregation, Batch, Org, Project, Run
 from axion_lab_server.shared.kernel import get_db
+from fastapi import Depends, HTTPException, Path, status
+from sqlalchemy.ext.asyncio import AsyncSession
 
 # Database session dependency
 DBSession = Annotated[AsyncSession, Depends(get_db)]
@@ -62,10 +61,10 @@ async def get_artifact_repo(
     yield ArtifactRepository(session)
 
 
-async def get_qm_repo(
+async def get_rm_repo(
     session: DBSession,
-) -> AsyncGenerator[QualityMetricRepository, None]:
-    yield QualityMetricRepository(session)
+) -> AsyncGenerator[RunMetricRepository, None]:
+    yield RunMetricRepository(session)
 
 
 async def get_ci_repo(
@@ -86,7 +85,7 @@ AggregationRepo = Annotated[AggregationRepository, Depends(get_aggregation_repo)
 RunRepo = Annotated[RunRepository, Depends(get_run_repo)]
 RunPinRepo = Annotated[RunPinRepository, Depends(get_run_pin_repo)]
 ArtifactRepo = Annotated[ArtifactRepository, Depends(get_artifact_repo)]
-QMRepo = Annotated[QualityMetricRepository, Depends(get_qm_repo)]
+RMRepo = Annotated[RunMetricRepository, Depends(get_rm_repo)]
 CIRepo = Annotated[ComparisonIndicatorRepository, Depends(get_ci_repo)]
 DPJobRepo = Annotated[DPJobRepository, Depends(get_dp_job_repo)]
 

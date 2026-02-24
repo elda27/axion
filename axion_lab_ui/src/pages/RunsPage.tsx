@@ -32,8 +32,9 @@ import {
   getBatch,
   getProject,
   triggerDPCompute,
+  getBatchRunMetrics,
 } from "../api/client";
-import type { RunResponse } from "../types";
+import type { RunResponse, RunMetricResponse } from "../types";
 import RunCard from "../components/RunCard";
 import RunCreateDialog from "../components/RunCreateDialog";
 import RunsTableView from "../components/RunsTableView";
@@ -73,8 +74,22 @@ export default function RunsPage() {
     [batchId, includeGarbage],
   );
 
+  // Load run metrics for all runs in the batch
+  const { data: batchMetrics } = useApi(
+    () => getBatchRunMetrics(batchId!, undefined, 500),
+    [batchId],
+  );
+
   const runMap = new Map<string, RunResponse>();
   allRuns?.items.forEach((r) => runMap.set(r.runId, r));
+
+  // Group run metrics by runId
+  const metricsMap = new Map<string, RunMetricResponse[]>();
+  batchMetrics?.items.forEach((m) => {
+    const list = metricsMap.get(m.runId) ?? [];
+    list.push(m);
+    metricsMap.set(m.runId, list);
+  });
 
   const handleTriggerDP = async () => {
     try {
@@ -240,6 +255,7 @@ export default function RunsPage() {
                 run={championRun}
                 pinLabel="champion"
                 onClick={() => navigate(`/runs/${championRun.runId}`)}
+                metrics={metricsMap.get(championRun.runId)}
               />
             </Box>
           )}
@@ -277,6 +293,7 @@ export default function RunsPage() {
                     run={run}
                     compact
                     onClick={() => navigate(`/runs/${run.runId}`)}
+                    metrics={metricsMap.get(run.runId)}
                   />
                 ))}
               </Stack>
@@ -290,6 +307,7 @@ export default function RunsPage() {
                           run={run}
                           compact
                           onClick={() => navigate(`/runs/${run.runId}`)}
+                          metrics={metricsMap.get(run.runId)}
                         />
                       ))}
                     </Stack>
@@ -333,6 +351,7 @@ export default function RunsPage() {
                     run={run}
                     pinLabel="user_selected"
                     onClick={() => navigate(`/runs/${run.runId}`)}
+                    metrics={metricsMap.get(run.runId)}
                   />
                 ))}
               </Stack>
@@ -353,6 +372,7 @@ export default function RunsPage() {
                     run={run}
                     compact
                     onClick={() => navigate(`/runs/${run.runId}`)}
+                    metrics={metricsMap.get(run.runId)}
                   />
                 ))}
               </Stack>

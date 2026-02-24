@@ -5,7 +5,7 @@
 ## 特徴
 
 - **成果物中心**: run の出来栄えを成果物ベースで評価・比較
-- **品質指標の後付け**: Quality Metric を後から追加・再計算可能
+- **品質指標の後付け**: Run Metric を後から追加・再計算可能
 - **階層管理**: Org > Project > Batch > Run の階層構造
 - **garbage 運用**: 不要な run を非表示化（復活可能）
 - **DP (差分再計算)**: 増分更新・部分推論に対応した効率的な集計
@@ -141,9 +141,9 @@ cd axion_lab_ui && pnpm build-storybook
 - `POST /v1/runs/{runId}/pins` - Pin 設定 (champion/user_selected)
 - `DELETE /v1/runs/{runId}/pins/{pinType}` - Pin 解除
 
-### Quality Metrics & Comparison Indicators
+### Run Metrics & Comparison Indicators
 
-- `GET /v1/runs/{runId}/quality-metrics` - QM 一覧
+- `GET /v1/runs/{runId}/run-metrics` - Run Metric 一覧
 - `GET /v1/runs/{runId}/comparison-indicators` - CI 一覧
 
 ### DP ジョブ
@@ -229,7 +229,7 @@ job = client.post(
 ).json()
 
 # 結果を確認
-qm = client.get(f"/runs/{run['runId']}/quality-metrics").json()
+qm = client.get(f"/runs/{run['runId']}/run-metrics").json()
 print(qm)  # mean_case_score, median_case_score, failure_rate など
 ```
 

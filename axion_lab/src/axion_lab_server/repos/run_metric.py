@@ -1,18 +1,17 @@
-"""Quality Metric repository"""
+"""Run Metric repository"""
 
 import json
 from typing import Any
 
+from axion_lab_server.repos.models.entities import AggregationMember, Run, RunMetric
+from axion_lab_server.shared.domain import RunMetricSource
+from axion_lab_server.shared.libs import generate_id, utc_now
 from sqlalchemy import and_, delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from axion_lab_server.repos.models.entities import AggregationMember, QualityMetric, Run
-from axion_lab_server.shared.domain import QualityMetricSource
-from axion_lab_server.shared.libs import generate_id, utc_now
 
-
-class QualityMetricRepository:
-    """Repository for QualityMetric operations"""
+class RunMetricRepository:
+    """Repository for RunMetric operations"""
 
     def __init__(self, session: AsyncSession):
         self.session = session
@@ -22,10 +21,10 @@ class QualityMetricRepository:
         run_id: str,
         key: str,
         value: Any,
-        source: QualityMetricSource,
+        source: RunMetricSource,
         version: int = 1,
-    ) -> QualityMetric:
-        """Upsert a quality metric (insert or update)"""
+    ) -> RunMetric:
+        """Upsert a run metric (insert or update)"""
         # Check if exists
         existing = await self.get_by_run_and_key(run_id, key, version)
 
@@ -36,7 +35,7 @@ class QualityMetricRepository:
             await self.session.flush()
             return existing
 
-        qm = QualityMetric(
+        rm = RunMetric(
             qm_id=generate_id(),
             run_id=run_id,
             key=key,
@@ -45,31 +44,31 @@ class QualityMetricRepository:
             computed_at=utc_now(),
             version=version,
         )
-        self.session.add(qm)
+        self.session.add(rm)
         await self.session.flush()
-        return qm
+        return rm
 
     async def get_by_run_and_key(
         self, run_id: str, key: str, version: int = 1
-    ) -> QualityMetric | None:
-        """Get quality metric by run ID and key"""
+    ) -> RunMetric | None:
+        """Get run metric by run ID and key"""
         result = await self.session.execute(
-            select(QualityMetric).where(
+            select(RunMetric).where(
                 and_(
-                    QualityMetric.run_id == run_id,
-                    QualityMetric.key == key,
-                    QualityMetric.version == version,
+                    RunMetric.run_id == run_id,
+                    RunMetric.key == key,
+                    RunMetric.version == version,
                 )
             )
         )
         return result.scalar_one_or_none()
 
-    async def list_by_run(self, run_id: str) -> list[QualityMetric]:
-        """List quality metrics by run"""
+    async def list_by_run(self, run_id: str) -> list[RunMetric]:
+        """List run metrics by run"""
         result = await self.session.execute(
-            select(QualityMetric)
-            .where(QualityMetric.run_id == run_id)
-            .order_by(QualityMetric.computed_at.desc())
+            select(RunMetric)
+            .where(RunMetric.run_id == run_id)
+            .order_by(RunMetric.computed_at.desc())
         )
         return list(result.scalars().all())
 
@@ -79,26 +78,26 @@ class QualityMetricRepository:
         key: str | None = None,
         limit: int = 100,
         cursor: str | None = None,
-    ) -> tuple[list[QualityMetric], str | None]:
-        """List quality metrics by batch with optional key filter"""
+    ) -> tuple[list[RunMetric], str | None]:
+        """List run metrics by batch with optional key filter"""
         query = (
-            select(QualityMetric)
-            .join(Run, QualityMetric.run_id == Run.run_id)
+            select(RunMetric)
+            .join(Run, RunMetric.run_id == Run.run_id)
             .where(Run.batch_id == batch_id)
         )
 
         if key:
-            query = query.where(QualityMetric.key == key)
+            query = query.where(RunMetric.key == key)
 
-        query = query.order_by(QualityMetric.computed_at.desc())
+        query = query.order_by(RunMetric.computed_at.desc())
 
         if cursor:
-            cursor_qm = await self.session.execute(
-                select(QualityMetric).where(QualityMetric.qm_id == cursor)
+            cursor_rm = await self.session.execute(
+                select(RunMetric).where(RunMetric.qm_id == cursor)
             )
-            cursor_obj = cursor_qm.scalar_one_or_none()
+            cursor_obj = cursor_rm.scalar_one_or_none()
             if cursor_obj:
-                query = query.where(QualityMetric.computed_at < cursor_obj.computed_at)
+                query = query.where(RunMetric.computed_at < cursor_obj.computed_at)
 
         query = query.limit(limit + 1)
         result = await self.session.execute(query)
@@ -112,9 +111,9 @@ class QualityMetricRepository:
         return metrics, next_cursor
 
     async def delete_by_run(self, run_id: str) -> int:
-        """Delete all quality metrics for a run"""
+        """Delete all run metrics for a run"""
         result = await self.session.execute(
-            delete(QualityMetric).where(QualityMetric.run_id == run_id)
+            delete(RunMetric).where(RunMetric.run_id == run_id)
         )
         rowcount = getattr(result, "rowcount", 0)
         return int(rowcount or 0)
@@ -125,29 +124,29 @@ class QualityMetricRepository:
         key: str | None = None,
         limit: int = 100,
         cursor: str | None = None,
-    ) -> tuple[list[QualityMetric], str | None]:
-        """List quality metrics for runs in an aggregation"""
+    ) -> tuple[list[RunMetric], str | None]:
+        """List run metrics for runs in an aggregation"""
         query = (
-            select(QualityMetric)
+            select(RunMetric)
             .join(
                 AggregationMember,
-                QualityMetric.run_id == AggregationMember.run_id,
+                RunMetric.run_id == AggregationMember.run_id,
             )
             .where(AggregationMember.aggregation_id == aggregation_id)
         )
 
         if key:
-            query = query.where(QualityMetric.key == key)
+            query = query.where(RunMetric.key == key)
 
-        query = query.order_by(QualityMetric.computed_at.desc())
+        query = query.order_by(RunMetric.computed_at.desc())
 
         if cursor:
-            cursor_qm = await self.session.execute(
-                select(QualityMetric).where(QualityMetric.qm_id == cursor)
+            cursor_rm = await self.session.execute(
+                select(RunMetric).where(RunMetric.qm_id == cursor)
             )
-            cursor_obj = cursor_qm.scalar_one_or_none()
+            cursor_obj = cursor_rm.scalar_one_or_none()
             if cursor_obj:
-                query = query.where(QualityMetric.computed_at < cursor_obj.computed_at)
+                query = query.where(RunMetric.computed_at < cursor_obj.computed_at)
 
         query = query.limit(limit + 1)
         result = await self.session.execute(query)

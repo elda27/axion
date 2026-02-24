@@ -136,7 +136,7 @@
 - `(run_id, created_at DESC)`
 - `(type, created_at DESC)`（必要なら）
 
-### quality_metrics
+### run_metrics
 
 | Column        | Type      | Constraints                               |
 | ------------- | --------- | ----------------------------------------- |
@@ -201,7 +201,7 @@ erDiagram
     aggregation_members }o--|| runs : references
     batches ||--o{ runs : has
     runs ||--o{ artifacts : has
-    runs ||--o{ quality_metrics : has
+    runs ||--o{ run_metrics : has
     runs ||--o{ comparison_indicators : has
     runs ||--o{ run_pins : has
     batches ||--o{ dp_jobs : triggers

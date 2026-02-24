@@ -28,16 +28,16 @@ from axion_lab_server.shared.domain.pagination import (
     PaginationParams,
 )
 from axion_lab_server.shared.domain.project import ProjectCreate, ProjectResponse
-from axion_lab_server.shared.domain.quality_metric import (
-    QualityMetricResponse,
-    QualityMetricSource,
-)
 from axion_lab_server.shared.domain.run import (
     RunCreate,
     RunResponse,
     RunStatus,
     RunSummaryResponse,
     RunUpdate,
+)
+from axion_lab_server.shared.domain.run_metric import (
+    RunMetricResponse,
+    RunMetricSource,
 )
 from axion_lab_server.shared.domain.run_pin import PinCreate, PinResponse, PinType
 
@@ -71,9 +71,9 @@ __all__ = [
     "PinCreate",
     "PinResponse",
     "PinType",
-    # QualityMetric
-    "QualityMetricResponse",
-    "QualityMetricSource",
+    # RunMetric
+    "RunMetricResponse",
+    "RunMetricSource",
     # ComparisonIndicator
     "ComparisonIndicatorResponse",
     # DPJob

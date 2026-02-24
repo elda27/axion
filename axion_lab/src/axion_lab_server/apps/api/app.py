@@ -4,11 +4,10 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from typing import Any, cast
 
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-
 from axion_lab_server.shared.kernel import close_db
 from axion_lab_server.shared.libs.config import get_settings
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 
 @asynccontextmanager
@@ -50,7 +49,7 @@ def create_app() -> FastAPI:
         orgs_router,
         pins_router,
         projects_router,
-        qm_router,
+        rm_router,
         runs_router,
     )
 
@@ -62,7 +61,7 @@ def create_app() -> FastAPI:
     app.include_router(runs_router, prefix=prefix)
     app.include_router(artifacts_router, prefix=prefix)
     app.include_router(pins_router, prefix=prefix)
-    app.include_router(qm_router, prefix=prefix)
+    app.include_router(rm_router, prefix=prefix)
     app.include_router(ci_router, prefix=prefix)
     app.include_router(dp_router, prefix=prefix)
 
