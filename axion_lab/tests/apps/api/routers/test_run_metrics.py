@@ -4,13 +4,13 @@ from typing import Any, cast
 from unittest.mock import AsyncMock, Mock
 
 import pytest
-
 from axion_lab_server.apps.api.routers.run_metrics import (
     _build_rm_response,
     list_run_metrics_by_batch,
     list_run_metrics_by_run,
 )
 from axion_lab_server.shared.domain import RunMetricSource
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 def _metric(*, qm_id: str = "qm-1", run_id: str = "run-1", value_json: str = ""):
@@ -63,16 +63,18 @@ async def test_list_run_metrics_by_run_returns_items() -> None:
 
     original = rm_module._get_evaluation_types_by_run
 
-    async def mock_get_eval_types(session, run_ids):
+    async def mock_get_eval_types(
+        session: AsyncSession, run_ids: list[str]
+    ) -> dict[str, list[str]]:
         return {rid: ["evaluation"] for rid in run_ids}
 
-    rm_module._get_evaluation_types_by_run = mock_get_eval_types
+    setattr(rm_module, "_get_evaluation_types_by_run", mock_get_eval_types)
     try:
         result = await list_run_metrics_by_run(
             run=run, repo=repo, artifact_repo=artifact_repo
         )
     finally:
-        rm_module._get_evaluation_types_by_run = original
+        setattr(rm_module, "_get_evaluation_types_by_run", original)
 
     repo.list_by_run.assert_awaited_once_with("run-123")
     assert [item.qm_id for item in result] == ["qm-1", "qm-2"]
@@ -101,10 +103,12 @@ async def test_list_run_metrics_by_batch_returns_cursor_page() -> None:
 
     original = rm_module._get_evaluation_types_by_run
 
-    async def mock_get_eval_types(session, run_ids):
+    async def mock_get_eval_types(
+        session: AsyncSession, run_ids: list[str]
+    ) -> dict[str, list[str]]:
         return {"run-a": ["evaluation"], "run-b": ["score"]}
 
-    rm_module._get_evaluation_types_by_run = mock_get_eval_types
+    setattr(rm_module, "_get_evaluation_types_by_run", mock_get_eval_types)
     try:
         page = await list_run_metrics_by_batch(
             batch=batch,
@@ -115,7 +119,7 @@ async def test_list_run_metrics_by_batch_returns_cursor_page() -> None:
             cursor="cur-1",
         )
     finally:
-        rm_module._get_evaluation_types_by_run = original
+        setattr(rm_module, "_get_evaluation_types_by_run", original)
 
     repo.list_by_batch.assert_awaited_once_with(
         "batch-123", key="accuracy", limit=2, cursor="cur-1"
@@ -139,16 +143,18 @@ async def test_list_run_metrics_by_batch_has_more_false_without_cursor() -> None
 
     original = rm_module._get_evaluation_types_by_run
 
-    async def mock_get_eval_types(session, run_ids):
+    async def mock_get_eval_types(
+        session: AsyncSession, run_ids: list[str]
+    ) -> dict[str, list[str]]:
         return {}
 
-    rm_module._get_evaluation_types_by_run = mock_get_eval_types
+    setattr(rm_module, "_get_evaluation_types_by_run", mock_get_eval_types)
     try:
         page = await list_run_metrics_by_batch(
             batch=batch, repo=repo, artifact_repo=artifact_repo
         )
     finally:
-        rm_module._get_evaluation_types_by_run = original
+        setattr(rm_module, "_get_evaluation_types_by_run", original)
 
     assert page.has_more is False
     assert page.next_cursor is None

@@ -22,7 +22,7 @@ class _CandidateConfig(TypedDict):
     scores: dict[str, float]
 
 
-def main() -> None:w
+def main() -> None:
     client = AxionLabClient()
 
     # ── 1. セットアップ ──────────────────────────────────────
