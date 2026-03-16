@@ -3,9 +3,10 @@ from collections.abc import Generator
 from pathlib import Path
 
 import pytest
-from axion_lab_server.shared.libs.config import get_settings
 from fastapi.routing import APIRoute
 from fastapi.testclient import TestClient
+
+from axion_lab_server.shared.libs.config import get_settings
 
 app_module = importlib.import_module("axion_lab_server.apps.api.app")
 

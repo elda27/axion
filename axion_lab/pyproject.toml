@@ -74,5 +74,9 @@ asyncio_mode = "auto"
 testpaths = ["tests"]
 
 [dependency-groups]
-dev = ["pytest>=9.0.2", "ruff>=0.15.0", "ty>=0.0.16"]
+dev = [
+    "pytest>=9.0.2",
+    "ruff>=0.15.0",
+    "ty>=0.0.16",
+]
 google = ["google-cloud-storage>=3.9.0"]

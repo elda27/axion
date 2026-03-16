@@ -103,24 +103,66 @@ class TestAppendSeriesAutoStep:
         set_active_run("run-1")
         client = _MinimalFakeClient()
 
-        append_series(tag="loss", kind="inline_number", type="evaluation", payload=0.5, client=client)  # type: ignore[arg-type]
-        append_series(tag="loss", kind="inline_number", type="evaluation", payload=0.4, client=client)  # type: ignore[arg-type]
+        append_series(
+            tag="loss",
+            kind="inline_number",
+            type="evaluation",
+            payload=0.5,
+            client=client,  # type: ignore[arg-type]
+        )
+        append_series(
+            tag="loss",
+            kind="inline_number",
+            type="evaluation",
+            payload=0.4,
+            client=client,  # type: ignore[arg-type]
+        )
 
-        result_acc = append_series(tag="accuracy", kind="inline_number", type="evaluation", payload=0.9, client=client)  # type: ignore[arg-type]
+        result_acc = append_series(
+            tag="accuracy",
+            kind="inline_number",
+            type="evaluation",
+            payload=0.9,
+            client=client,  # type: ignore[arg-type]
+        )
         assert result_acc.meta["series_step"] == 0  # independent counter
 
-        result_loss = append_series(tag="loss", kind="inline_number", type="evaluation", payload=0.3, client=client)  # type: ignore[arg-type]
+        result_loss = append_series(
+            tag="loss",
+            kind="inline_number",
+            type="evaluation",
+            payload=0.3,
+            client=client,  # type: ignore[arg-type]
+        )
         assert result_loss.meta["series_step"] == 2  # continues from earlier
 
     def test_different_runs_have_independent_counters(self) -> None:
         client = _MinimalFakeClient()
 
         set_active_run("run-A")
-        append_series(tag="loss", kind="inline_number", type="evaluation", payload=1.0, client=client)  # type: ignore[arg-type]
-        append_series(tag="loss", kind="inline_number", type="evaluation", payload=0.9, client=client)  # type: ignore[arg-type]
+        append_series(
+            tag="loss",
+            kind="inline_number",
+            type="evaluation",
+            payload=1.0,
+            client=client,  # type: ignore[arg-type]
+        )
+        append_series(
+            tag="loss",
+            kind="inline_number",
+            type="evaluation",
+            payload=0.9,
+            client=client,  # type: ignore[arg-type]
+        )
 
         set_active_run("run-B")
-        result = append_series(tag="loss", kind="inline_number", type="evaluation", payload=0.5, client=client)  # type: ignore[arg-type]
+        result = append_series(
+            tag="loss",
+            kind="inline_number",
+            type="evaluation",
+            payload=0.5,
+            client=client,  # type: ignore[arg-type]
+        )
         assert result.meta["series_step"] == 0
 
 
@@ -147,11 +189,30 @@ class TestAppendSeriesExplicitStep:
         client = _MinimalFakeClient()
 
         # auto: 0
-        append_series(tag="loss", kind="inline_number", type="evaluation", payload=1.0, client=client)  # type: ignore[arg-type]
+        append_series(
+            tag="loss",
+            kind="inline_number",
+            type="evaluation",
+            payload=1.0,
+            client=client,  # type: ignore[arg-type]
+        )
         # explicit: 100 (should NOT move auto counter)
-        append_series(tag="loss", kind="inline_number", type="evaluation", payload=0.9, step=100, client=client)  # type: ignore[arg-type]
+        append_series(
+            tag="loss",
+            kind="inline_number",
+            type="evaluation",
+            payload=0.9,
+            step=100,
+            client=client,  # type: ignore[arg-type]
+        )
         # auto again: should be 1
-        result = append_series(tag="loss", kind="inline_number", type="evaluation", payload=0.8, client=client)  # type: ignore[arg-type]
+        result = append_series(
+            tag="loss",
+            kind="inline_number",
+            type="evaluation",
+            payload=0.8,
+            client=client,  # type: ignore[arg-type]
+        )
         assert result.meta["series_step"] == 1
 
 
@@ -326,35 +387,83 @@ class TestResetSeries:
         set_active_run("run-1")
         client = _MinimalFakeClient()
 
-        append_series(tag="loss", kind="inline_number", type="evaluation", payload=1.0, client=client)  # type: ignore[arg-type]
-        append_series(tag="loss", kind="inline_number", type="evaluation", payload=0.9, client=client)  # type: ignore[arg-type]
+        append_series(
+            tag="loss",
+            kind="inline_number",
+            type="evaluation",
+            payload=1.0,
+            client=client,  # type: ignore[arg-type]
+        )
+        append_series(
+            tag="loss",
+            kind="inline_number",
+            type="evaluation",
+            payload=0.9,
+            client=client,  # type: ignore[arg-type]
+        )
 
         reset_series()
 
-        result = append_series(tag="loss", kind="inline_number", type="evaluation", payload=0.8, client=client)  # type: ignore[arg-type]
+        result = append_series(
+            tag="loss",
+            kind="inline_number",
+            type="evaluation",
+            payload=0.8,
+            client=client,  # type: ignore[arg-type]
+        )
         assert result.meta["series_step"] == 0
 
     def test_reset_specific_run(self) -> None:
         client = _MinimalFakeClient()
 
         set_active_run("run-A")
-        append_series(tag="loss", kind="inline_number", type="evaluation", payload=1.0, client=client)  # type: ignore[arg-type]
-        append_series(tag="loss", kind="inline_number", type="evaluation", payload=0.9, client=client)  # type: ignore[arg-type]
+        append_series(
+            tag="loss",
+            kind="inline_number",
+            type="evaluation",
+            payload=1.0,
+            client=client,  # type: ignore[arg-type]
+        )
+        append_series(
+            tag="loss",
+            kind="inline_number",
+            type="evaluation",
+            payload=0.9,
+            client=client,  # type: ignore[arg-type]
+        )
 
         set_active_run("run-B")
-        append_series(tag="loss", kind="inline_number", type="evaluation", payload=0.5, client=client)  # type: ignore[arg-type]
+        append_series(
+            tag="loss",
+            kind="inline_number",
+            type="evaluation",
+            payload=0.5,
+            client=client,  # type: ignore[arg-type]
+        )
 
         # Reset only run-A
         reset_series(run_id="run-A")
 
         # run-A counter is reset
         set_active_run("run-A")
-        result_a = append_series(tag="loss", kind="inline_number", type="evaluation", payload=0.7, client=client)  # type: ignore[arg-type]
+        result_a = append_series(
+            tag="loss",
+            kind="inline_number",
+            type="evaluation",
+            payload=0.7,
+            client=client,  # type: ignore[arg-type]
+        )
         assert result_a.meta["series_step"] == 0
 
         # run-B counter is untouched
         set_active_run("run-B")
-        result_b = append_series(tag="loss", kind="inline_number", type="evaluation", payload=0.4, client=client)  # type: ignore[arg-type]
+        result_b = append_series(
+            tag="loss",
+            kind="inline_number",
+            type="evaluation",
+            payload=0.4,
+            client=client,  # type: ignore[arg-type]
+        )
         assert result_b.meta["series_step"] == 1
 
 

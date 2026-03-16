@@ -6,11 +6,12 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any, cast
 
-from axion_lab_server.shared.kernel import close_db, run_startup_migrations
-from axion_lab_server.shared.libs.config import Settings, get_settings
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
+
+from axion_lab_server.shared.kernel import close_db, run_startup_migrations
+from axion_lab_server.shared.libs.config import Settings, get_settings
 
 DEFAULT_UI_DIST_DIR = Path(__file__).resolve().parents[5] / "axion_lab_ui" / "dist"
 
