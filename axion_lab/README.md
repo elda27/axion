@@ -37,6 +37,7 @@ uv run axion-lab server --reload --host 0.0.0.0 --port 8000
 Default local values:
 
 - `DATABASE_URL=sqlite+aiosqlite:///./axion_lab.db`
+- `DATABASE_TYPE=sqlite`
 - `OBJECT_STORE_PROVIDER=file`
 - `OBJECT_STORE_LOCAL_PATH=./data/object_store`
 
