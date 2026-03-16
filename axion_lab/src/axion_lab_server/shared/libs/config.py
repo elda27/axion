@@ -29,7 +29,9 @@ class Settings(BaseSettings):
     database_type: Literal["postgresql", "sqlite"] = "postgresql"
 
     # Object Storage
-    object_store_provider: Literal["s3", "minio", "rustfs", "gcs", "file", "local"] = "minio"
+    object_store_provider: Literal["s3", "minio", "rustfs", "gcs", "file", "local"] = (
+        "minio"
+    )
     object_store_endpoint: str = "http://localhost:9010"
     object_store_access_key: str = "minioadmin"
     object_store_secret_key: str = "minioadmin"
@@ -43,6 +45,9 @@ class Settings(BaseSettings):
 
     # API
     api_prefix: str = "/v1"
+
+    # UI
+    ui_dist_dir: str | None = None
 
 
 @lru_cache

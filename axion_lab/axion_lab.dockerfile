@@ -6,7 +6,7 @@ WORKDIR /app
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 # Copy dependency files
-COPY pyproject.toml uv.lock ./
+COPY pyproject.toml uv.lock alembic.ini ./
 
 # Install dependencies
 RUN uv sync --frozen --no-dev
@@ -14,6 +14,7 @@ RUN uv sync --frozen --no-dev
 # Copy source code
 COPY src/axion_lab ./src/axion_lab
 COPY src/axion_lab_server ./src/axion_lab_server
+COPY src/axion_lab_alembic ./src/axion_lab_alembic
 
 # Expose port
 EXPOSE 8000

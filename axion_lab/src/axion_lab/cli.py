@@ -4,6 +4,10 @@ import argparse
 import os
 import subprocess
 import sys
+from pathlib import Path
+
+PACKAGE_ROOT = Path(__file__).resolve().parents[2]
+ALEMBIC_CONFIG_PATH = PACKAGE_ROOT / "alembic.ini"
 
 
 def main() -> None:
@@ -66,10 +70,6 @@ def run_server(host: str, port: int, reload: bool) -> None:
     os.environ.setdefault("OBJECT_STORE_PROVIDER", "file")
     os.environ.setdefault("OBJECT_STORE_LOCAL_PATH", "./data/object_store")
 
-    migration_return_code = run_alembic(["upgrade", "head"], exit_after=False)
-    if migration_return_code != 0:
-        sys.exit(migration_return_code)
-
     import uvicorn
 
     uvicorn.run(
@@ -82,7 +82,10 @@ def run_server(host: str, port: int, reload: bool) -> None:
 
 def run_alembic(args: list[str], *, exit_after: bool = True) -> int:
     """Run alembic command"""
-    result = subprocess.run(["alembic"] + args, check=False)
+    result = subprocess.run(
+        ["alembic", "-c", os.fspath(ALEMBIC_CONFIG_PATH), *args],
+        check=False,
+    )
     if exit_after:
         sys.exit(result.returncode)
     return result.returncode

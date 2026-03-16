@@ -56,15 +56,15 @@ cp .env.example .env
 5. **データベースの初期化**
 
 ```bash
-axion-lab init-db
+uv run axion_lab db-upgrade
 ```
 
 6. **API サーバーの起動**
 
-`axion-lab server` はデフォルトで SQLite + ファイルストレージを使い、起動前に migration を適用します（環境変数が設定されている場合はその値が優先されます）。
+`axion_lab server` と `axion-lab server` はどちらも使えます。どちらもデフォルトで SQLite + ファイルストレージを使い、起動前に migration を適用します（環境変数が設定されている場合はその値が優先されます）。`python -m axion_lab server` でも同じ挙動です。
 
 ```bash
-axion-lab server --reload
+uv run axion_lab server --reload
 ```
 
 API は http://localhost:8000 で起動します。

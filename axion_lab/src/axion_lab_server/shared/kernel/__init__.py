@@ -8,6 +8,7 @@ from axion_lab_server.shared.kernel.database import (
     get_session,
     get_session_maker,
 )
+from axion_lab_server.shared.kernel.migrations import run_startup_migrations
 
 __all__ = [
     "create_engine",
@@ -16,4 +17,5 @@ __all__ = [
     "get_session",
     "get_db",
     "close_db",
+    "run_startup_migrations",
 ]

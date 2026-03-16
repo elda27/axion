@@ -36,6 +36,7 @@ dev = [
 
 [project.scripts]
 axion-lab = "axion_lab.cli:main"
+axion_lab = "axion_lab.cli:main"
 
 [build-system]
 requires = ["hatchling", "uv-dynamic-versioning"]
@@ -49,7 +50,10 @@ enable = true
 fallback-version = "0.0.0"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/axion_lab", "src/axion_lab_server"]
+packages = ["src/axion_lab", "src/axion_lab_server", "src/axion_lab_alembic"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"alembic.ini" = "alembic.ini"
 
 [tool.ruff]
 line-length = 100

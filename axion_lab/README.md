@@ -28,10 +28,10 @@ make build-Axion Lab
 
 ### Start the API server
 
-`axion-lab server` automatically runs migrations before startup. By default it uses SQLite + file storage for local development (and respects explicit environment variables when provided).
+`axion_lab server`, `axion-lab server`, and `python -m axion_lab server` all start the same API server. The command automatically runs migrations before startup. By default it uses SQLite + file storage for local development (and respects explicit environment variables when provided).
 
 ```bash
-uv run axion-lab server --reload --host 0.0.0.0 --port 8000
+uv run axion_lab server --reload --host 0.0.0.0 --port 8000
 ```
 
 Default local values:
