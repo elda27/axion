@@ -4,14 +4,13 @@ from typing import Any, cast
 from unittest.mock import AsyncMock, Mock
 
 import pytest
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from axion_lab_server.apps.api.routers.run_metrics import (
     _build_rm_response,
     list_run_metrics_by_batch,
     list_run_metrics_by_run,
 )
 from axion_lab_server.shared.domain import RunMetricSource
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 def _metric(*, qm_id: str = "qm-1", run_id: str = "run-1", value_json: str = ""):
@@ -69,9 +68,7 @@ async def test_list_run_metrics_by_run_returns_items(
     ) -> dict[str, list[str]]:
         return {rid: ["evaluation"] for rid in run_ids}
 
-    monkeypatch.setattr(
-        rm_module, "_get_evaluation_types_by_run", mock_get_eval_types
-    )
+    monkeypatch.setattr(rm_module, "_get_evaluation_types_by_run", mock_get_eval_types)
     result = await list_run_metrics_by_run(
         run=run, repo=repo, artifact_repo=artifact_repo
     )
@@ -108,9 +105,7 @@ async def test_list_run_metrics_by_batch_returns_cursor_page(
     ) -> dict[str, list[str]]:
         return {"run-a": ["evaluation"], "run-b": ["score"]}
 
-    monkeypatch.setattr(
-        rm_module, "_get_evaluation_types_by_run", mock_get_eval_types
-    )
+    monkeypatch.setattr(rm_module, "_get_evaluation_types_by_run", mock_get_eval_types)
     page = await list_run_metrics_by_batch(
         batch=batch,
         repo=repo,
@@ -147,9 +142,7 @@ async def test_list_run_metrics_by_batch_has_more_false_without_cursor(
     ) -> dict[str, list[str]]:
         return {}
 
-    monkeypatch.setattr(
-        rm_module, "_get_evaluation_types_by_run", mock_get_eval_types
-    )
+    monkeypatch.setattr(rm_module, "_get_evaluation_types_by_run", mock_get_eval_types)
     page = await list_run_metrics_by_batch(
         batch=batch, repo=repo, artifact_repo=artifact_repo
     )
