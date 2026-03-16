@@ -1,4 +1,4 @@
-"""Local filesystem object storage implementation"""
+"""File-system object storage implementation."""
 
 import json
 from pathlib import Path
@@ -8,10 +8,10 @@ from urllib.parse import quote
 from axion_lab_server.gateways.storage.base import ObjectRef, ObjectStore
 
 
-class LocalObjectStore(ObjectStore):
-    """Local filesystem implementation of ObjectStore"""
+class FileObjectStore(ObjectStore):
+    """File-system implementation of ObjectStore."""
 
-    def __init__(self, base_path: str, bucket: str = "local"):
+    def __init__(self, base_path: str, bucket: str = "file"):
         self.base_path = Path(base_path)
         self.bucket = bucket
         self.base_path.mkdir(parents=True, exist_ok=True)
@@ -43,7 +43,7 @@ class LocalObjectStore(ObjectStore):
         return ObjectRef(
             key=key,
             bucket=self.bucket,
-            provider="local",
+            provider="file",
             size=len(data),
             content_type=content_type,
             metadata=metadata,
@@ -90,7 +90,7 @@ class LocalObjectStore(ObjectStore):
                         ObjectRef(
                             key=rel_key,
                             bucket=self.bucket,
-                            provider="local",
+                            provider="file",
                             size=path.stat().st_size,
                         )
                     )
@@ -99,7 +99,7 @@ class LocalObjectStore(ObjectStore):
                 ObjectRef(
                     key=prefix,
                     bucket=self.bucket,
-                    provider="local",
+                    provider="file",
                     size=prefix_path.stat().st_size,
                 )
             )
@@ -119,13 +119,17 @@ class LocalObjectStore(ObjectStore):
         return False
 
     async def presign_get(self, key: str, expires_sec: int = 3600) -> str:
-        """Generate a file:// URL for local files"""
+        """Generate a file:// URL for files."""
         path = self._get_full_path(key)
         return f"file://{quote(str(path.absolute()))}"
 
     async def presign_put(
         self, key: str, content_type: str | None = None, expires_sec: int = 3600
     ) -> str:
-        """Generate a file:// URL for local files"""
+        """Generate a file:// URL for files."""
         path = self._get_full_path(key)
         return f"file://{quote(str(path.absolute()))}"
+
+
+# Backward compatibility alias
+LocalObjectStore = FileObjectStore

@@ -61,6 +61,8 @@ axion-lab init-db
 
 6. **API サーバーの起動**
 
+`axion-lab server` はデフォルトで SQLite + ファイルストレージを使い、起動前に migration を適用します（環境変数が設定されている場合はその値が優先されます）。
+
 ```bash
 axion-lab server --reload
 ```
@@ -75,7 +77,7 @@ OpenAPI ドキュメントは http://localhost:8000/docs で確認できます�
 ```env
 DATABASE_URL=sqlite+aiosqlite:///./axion_lab.db
 DATABASE_TYPE=sqlite
-OBJECT_STORE_PROVIDER=local
+OBJECT_STORE_PROVIDER=file
 OBJECT_STORE_LOCAL_PATH=./data/object_store
 ```
 

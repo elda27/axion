@@ -18,19 +18,17 @@ depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
-    # Org name must be globally unique
-    op.create_unique_constraint("uq_orgs_name", "orgs", ["name"])
+    # Use unique indexes for SQLite compatibility
+    op.create_index("uq_orgs_name", "orgs", ["name"], unique=True)
 
     # Project name must be unique within an organization
-    op.create_unique_constraint("uq_projects_org_name", "projects", ["org_id", "name"])
+    op.create_index("uq_projects_org_name", "projects", ["org_id", "name"], unique=True)
 
     # Batch name must be unique within a project
-    op.create_unique_constraint(
-        "uq_batches_project_name", "batches", ["project_id", "name"]
-    )
+    op.create_index("uq_batches_project_name", "batches", ["project_id", "name"], unique=True)
 
 
 def downgrade() -> None:
-    op.drop_constraint("uq_batches_project_name", "batches", type_="unique")
-    op.drop_constraint("uq_projects_org_name", "projects", type_="unique")
-    op.drop_constraint("uq_orgs_name", "orgs", type_="unique")
+    op.drop_index("uq_batches_project_name", table_name="batches")
+    op.drop_index("uq_projects_org_name", table_name="projects")
+    op.drop_index("uq_orgs_name", table_name="orgs")

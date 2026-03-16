@@ -4,7 +4,7 @@ import pytest
 
 from axion_lab_server.gateways.storage.factory import get_object_store
 from axion_lab_server.gateways.storage.gcs import GCSObjectStore
-from axion_lab_server.gateways.storage.local import LocalObjectStore
+from axion_lab_server.gateways.storage.local import FileObjectStore
 from axion_lab_server.gateways.storage.s3 import S3ObjectStore
 
 
@@ -18,7 +18,7 @@ def clear_cache():
 
 def _mock_settings(**overrides):
     defaults = {
-        "object_store_provider": "local",
+        "object_store_provider": "file",
         "object_store_local_path": "/tmp/test-store",
         "object_store_bucket": "test-bucket",
         "gcs_project_id": "test-project",
@@ -41,11 +41,11 @@ def _mock_settings(**overrides):
 
 @patch("axion_lab_server.gateways.storage.factory.get_settings")
 def test_factory_returns_local_store(mock_get_settings) -> None:
-    mock_get_settings.return_value = _mock_settings(object_store_provider="local")
+    mock_get_settings.return_value = _mock_settings(object_store_provider="file")
 
     store = get_object_store()
 
-    assert isinstance(store, LocalObjectStore)
+    assert isinstance(store, FileObjectStore)
 
 
 @patch("axion_lab_server.gateways.storage.gcs.storage.Client")

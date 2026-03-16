@@ -4,7 +4,7 @@ from functools import lru_cache
 
 from axion_lab_server.gateways.storage.base import ObjectStore
 from axion_lab_server.gateways.storage.gcs import GCSObjectStore
-from axion_lab_server.gateways.storage.local import LocalObjectStore
+from axion_lab_server.gateways.storage.local import FileObjectStore
 from axion_lab_server.gateways.storage.s3 import S3ObjectStore
 from axion_lab_server.shared.libs.config import get_settings
 
@@ -14,8 +14,8 @@ def get_object_store() -> ObjectStore:
     """Get object store instance based on configuration"""
     settings = get_settings()
 
-    if settings.object_store_provider == "local":
-        return LocalObjectStore(
+    if settings.object_store_provider in ("file", "local"):
+        return FileObjectStore(
             base_path=settings.object_store_local_path,
             bucket=settings.object_store_bucket,
         )
