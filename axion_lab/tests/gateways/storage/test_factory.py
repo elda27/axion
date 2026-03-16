@@ -40,7 +40,7 @@ def _mock_settings(**overrides):
 
 
 @patch("axion_lab_server.gateways.storage.factory.get_settings")
-def test_factory_returns_local_store(mock_get_settings) -> None:
+def test_factory_returns_file_store(mock_get_settings) -> None:
     mock_get_settings.return_value = _mock_settings(object_store_provider="file")
 
     store = get_object_store()
