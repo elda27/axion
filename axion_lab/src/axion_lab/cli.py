@@ -1,6 +1,7 @@
 """CLI entry point"""
 
 import argparse
+import os
 import subprocess
 import sys
 
@@ -59,7 +60,16 @@ def main() -> None:
 
 
 def run_server(host: str, port: int, reload: bool) -> None:
-    """Run the API server"""
+    """Run the API server."""
+    os.environ.setdefault("DATABASE_URL", "sqlite+aiosqlite:///./axion_lab.db")
+    os.environ.setdefault("DATABASE_TYPE", "sqlite")
+    os.environ.setdefault("OBJECT_STORE_PROVIDER", "file")
+    os.environ.setdefault("OBJECT_STORE_LOCAL_PATH", "./data/object_store")
+
+    migration_return_code = run_alembic(["upgrade", "head"], exit_after=False)
+    if migration_return_code != 0:
+        sys.exit(migration_return_code)
+
     import uvicorn
 
     uvicorn.run(
@@ -70,10 +80,12 @@ def run_server(host: str, port: int, reload: bool) -> None:
     )
 
 
-def run_alembic(args: list[str]) -> None:
+def run_alembic(args: list[str], *, exit_after: bool = True) -> int:
     """Run alembic command"""
     result = subprocess.run(["alembic"] + args, check=False)
-    sys.exit(result.returncode)
+    if exit_after:
+        sys.exit(result.returncode)
+    return result.returncode
 
 
 if __name__ == "__main__":

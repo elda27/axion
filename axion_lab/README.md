@@ -28,9 +28,18 @@ make build-Axion Lab
 
 ### Start the API server
 
+`axion-lab server` automatically runs migrations before startup. By default it uses SQLite + file storage for local development (and respects explicit environment variables when provided).
+
 ```bash
-uv run uvicorn axion_lab_server.apps.api.app:app --reload --host 0.0.0.0 --port 8000
+uv run axion-lab server --reload --host 0.0.0.0 --port 8000
 ```
+
+Default local values:
+
+- `DATABASE_URL=sqlite+aiosqlite:///./axion_lab.db`
+- `DATABASE_TYPE=sqlite`
+- `OBJECT_STORE_PROVIDER=file`
+- `OBJECT_STORE_LOCAL_PATH=./data/object_store`
 
 ### Run tests
 

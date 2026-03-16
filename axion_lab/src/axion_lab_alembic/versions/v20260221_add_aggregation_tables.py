@@ -49,6 +49,7 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(["aggregation_id"], ["aggregations.aggregation_id"]),
         sa.ForeignKeyConstraint(["run_id"], ["runs.run_id"]),
         sa.PrimaryKeyConstraint("member_id"),
+        sa.UniqueConstraint("aggregation_id", "run_id", name="uq_aggregation_run"),
     )
     op.create_index(
         "ix_agg_members_agg_added",
@@ -61,11 +62,6 @@ def upgrade() -> None:
         "aggregation_members",
         ["run_id"],
         unique=False,
-    )
-    op.create_unique_constraint(
-        "uq_aggregation_run",
-        "aggregation_members",
-        ["aggregation_id", "run_id"],
     )
 
 

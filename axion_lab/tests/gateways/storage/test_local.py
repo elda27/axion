@@ -1,11 +1,11 @@
 import pytest
 
-from axion_lab_server.gateways.storage.local import LocalObjectStore
+from axion_lab_server.gateways.storage.local import FileObjectStore
 
 
 @pytest.fixture
 def store(tmp_path):
-    return LocalObjectStore(base_path=str(tmp_path), bucket="test-bucket")
+    return FileObjectStore(base_path=str(tmp_path), bucket="test-bucket")
 
 
 class TestPutAndGetBytes:
@@ -15,7 +15,7 @@ class TestPutAndGetBytes:
 
         assert ref.key == "test/file.bin"
         assert ref.bucket == "test-bucket"
-        assert ref.provider == "local"
+        assert ref.provider == "file"
         assert ref.size == 5
 
         data = await store.get_bytes("test/file.bin")
@@ -247,7 +247,7 @@ class TestListKeys:
         refs = await store.list_keys("meta-check")
 
         assert refs[0].bucket == "test-bucket"
-        assert refs[0].provider == "local"
+        assert refs[0].provider == "file"
 
 
 class TestDelete:
@@ -345,17 +345,17 @@ class TestPresign:
 class TestConstructor:
     def test_creates_base_directory(self, tmp_path) -> None:
         new_path = tmp_path / "new" / "dir"
-        LocalObjectStore(base_path=str(new_path), bucket="b")
+        FileObjectStore(base_path=str(new_path), bucket="b")
 
         assert new_path.exists()
 
     def test_default_bucket(self, tmp_path) -> None:
-        store = LocalObjectStore(base_path=str(tmp_path))
+        store = FileObjectStore(base_path=str(tmp_path))
 
-        assert store.bucket == "local"
+        assert store.bucket == "file"
 
     def test_custom_bucket(self, tmp_path) -> None:
-        store = LocalObjectStore(base_path=str(tmp_path), bucket="my-bucket")
+        store = FileObjectStore(base_path=str(tmp_path), bucket="my-bucket")
 
         assert store.bucket == "my-bucket"
 
