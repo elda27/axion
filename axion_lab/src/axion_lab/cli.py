@@ -2,12 +2,58 @@
 
 import argparse
 import os
-import subprocess
 import sys
-from pathlib import Path
 
-PACKAGE_ROOT = Path(__file__).resolve().parents[2]
-ALEMBIC_CONFIG_PATH = PACKAGE_ROOT / "alembic.ini"
+from alembic import command
+from axion_lab_server.shared.kernel.migrations import create_alembic_config
+
+
+def _run_alembic_command(args: list[str]) -> None:
+    config = create_alembic_config()
+
+    if not args:
+        raise ValueError("No Alembic command provided")
+
+    if args[0] == "upgrade":
+        if len(args) != 2:
+            raise ValueError("upgrade expects a single revision target")
+        command.upgrade(config, args[1])
+        return
+
+    if args[0] == "downgrade":
+        if len(args) != 2:
+            raise ValueError("downgrade expects a single revision target")
+        command.downgrade(config, args[1])
+        return
+
+    if args[0] == "revision":
+        autogenerate = False
+        message: str | None = None
+        index = 1
+
+        while index < len(args):
+            arg = args[index]
+            if arg in {"-a", "--autogenerate"}:
+                autogenerate = True
+                index += 1
+                continue
+
+            if arg in {"-m", "--message"}:
+                if index + 1 >= len(args):
+                    raise ValueError("revision requires a message after -m/--message")
+                message = args[index + 1]
+                index += 2
+                continue
+
+            raise ValueError(f"Unsupported Alembic revision argument: {arg}")
+
+        if message is None:
+            raise ValueError("revision requires -m/--message")
+
+        command.revision(config, message=message, autogenerate=autogenerate)
+        return
+
+    raise ValueError(f"Unsupported Alembic command: {args[0]}")
 
 
 def main() -> None:
@@ -82,13 +128,10 @@ def run_server(host: str, port: int, reload: bool) -> None:
 
 def run_alembic(args: list[str], *, exit_after: bool = True) -> int:
     """Run alembic command"""
-    result = subprocess.run(
-        ["alembic", "-c", os.fspath(ALEMBIC_CONFIG_PATH), *args],
-        check=False,
-    )
+    _run_alembic_command(args)
     if exit_after:
-        sys.exit(result.returncode)
-    return result.returncode
+        sys.exit(0)
+    return 0
 
 
 if __name__ == "__main__":

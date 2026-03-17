@@ -1,52 +1,59 @@
 import os
 import runpy
-import subprocess
 import sys
 from pathlib import Path
 from types import SimpleNamespace
-from typing import cast
 
 import axion_lab.cli as cli
 
 
-def test_run_alembic_uses_packaged_config(monkeypatch) -> None:
+def test_run_alembic_upgrade_uses_packaged_script_location(monkeypatch) -> None:
     captured: dict[str, object] = {}
 
-    def fake_run(command, *, check: bool) -> subprocess.CompletedProcess[str]:
-        captured["command"] = command
-        captured["check"] = check
-        return subprocess.CompletedProcess(command, 0)
+    def fake_upgrade(config, revision: str) -> None:
+        captured["revision"] = revision
+        captured["script_location"] = config.get_main_option("script_location")
 
-    monkeypatch.setattr(cli.subprocess, "run", fake_run)
+    monkeypatch.setattr(cli.command, "upgrade", fake_upgrade)
 
     return_code = cli.run_alembic(["upgrade", "head"], exit_after=False)
 
-    package_root = Path(cli.__file__).resolve().parents[2]
+    expected_script_location = (
+        Path(cli.__file__).resolve().parents[1] / "axion_lab_alembic"
+    )
+    script_location = captured["script_location"]
+
     assert return_code == 0
-    assert captured["command"] == [
-        "alembic",
-        "-c",
-        os.fspath(package_root / "alembic.ini"),
-        "upgrade",
-        "head",
-    ]
-    assert captured["check"] is False
+    assert captured["revision"] == "head"
+    assert isinstance(script_location, str)
+    assert Path(script_location).resolve() == expected_script_location
 
 
-def test_run_alembic_does_not_override_current_working_directory(monkeypatch) -> None:
+def test_run_alembic_revision_supports_autogenerate(monkeypatch) -> None:
     captured: dict[str, object] = {}
 
-    def fake_run(command, **kwargs) -> subprocess.CompletedProcess[str]:
-        captured["command"] = command
-        captured["kwargs"] = kwargs
-        return subprocess.CompletedProcess(command, 0)
+    def fake_revision(config, *, message: str, autogenerate: bool) -> None:
+        captured["message"] = message
+        captured["autogenerate"] = autogenerate
+        captured["script_location"] = config.get_main_option("script_location")
 
-    monkeypatch.setattr(cli.subprocess, "run", fake_run)
+    monkeypatch.setattr(cli.command, "revision", fake_revision)
 
-    return_code = cli.run_alembic(["upgrade", "head"], exit_after=False)
+    return_code = cli.run_alembic(
+        ["revision", "-m", "add runs table", "--autogenerate"],
+        exit_after=False,
+    )
+
+    expected_script_location = (
+        Path(cli.__file__).resolve().parents[1] / "axion_lab_alembic"
+    )
+    script_location = captured["script_location"]
 
     assert return_code == 0
-    assert "cwd" not in cast(dict[str, object], captured["kwargs"])
+    assert captured["message"] == "add runs table"
+    assert captured["autogenerate"] is True
+    assert isinstance(script_location, str)
+    assert Path(script_location).resolve() == expected_script_location
 
 
 def test_run_server_applies_local_defaults(monkeypatch) -> None:
